@@ -1,62 +1,49 @@
 import type { MetadataRoute } from "next";
-import { getPublishedPosts } from "@/lib/services/posts";
-import { getAllCategories } from "@/lib/services/categories";
-import { getAllTags } from "@/lib/services/tags";
 import { getBaseUrl } from "@/lib/seo";
+import {
+  getSitemapIndexChunks,
+  getSitemapCoreRoutes,
+  getSitemapPostsChunk,
+  getSitemapTagsChunk,
+  getSitemapAuthorsChunk,
+} from "@/lib/services/sitemap";
 
-export const revalidate = 3600;
+export const revalidate = 3600; // Edge cached for 1 hour
 
 export async function generateSitemaps() {
-  return [{ id: 0 }, { id: 1 }];
+  return await getSitemapIndexChunks();
 }
 
 export default async function sitemap(props: {
-  id?: number | string;
+  id?: Promise<string | number> | string | number;
 }): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();
-  const sitemapId = Number(props?.id ?? 0);
+  const resolved = props?.id instanceof Promise ? await props.id : (props?.id ?? "core");
+  const sitemapId = String(resolved);
 
-  // Sitemap 0: Core pages, categories, tags
-  if (sitemapId === 0) {
-    const [categoriesList, tagsList] = await Promise.all([
-      getAllCategories(),
-      getAllTags(),
-    ]);
-
-    const staticRoutes: MetadataRoute.Sitemap = [
-      { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
-      { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
-      { url: `${baseUrl}/search`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
-      { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-      { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    ];
-
-    const categoryRoutes: MetadataRoute.Sitemap = categoriesList.map((cat) => ({
-      url: `${baseUrl}/category/${cat.slug}`,
-      lastModified: cat.updatedAt,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    }));
-
-    const tagRoutes: MetadataRoute.Sitemap = tagsList.map((tag) => ({
-      url: `${baseUrl}/tag/${tag.slug}`,
-      lastModified: tag.updatedAt,
-      changeFrequency: "weekly",
-      priority: 0.6,
-    }));
-
-    return [...staticRoutes, ...categoryRoutes, ...tagRoutes];
+  if (sitemapId === "core" || sitemapId === "0") {
+    return await getSitemapCoreRoutes(baseUrl);
   }
 
-  // Sitemap 1+: Paginated blog posts (supports millions of articles)
-  const postsLimit = 50000;
-  const page = sitemapId;
-  const postsData = await getPublishedPosts({ page, limit: postsLimit });
+  if (sitemapId.startsWith("posts-")) {
+    const page = parseInt(sitemapId.replace("posts-", ""), 10) || 1;
+    return await getSitemapPostsChunk(page, baseUrl);
+  }
 
-  return postsData.posts.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post.publishedAt || post.createdAt,
-    changeFrequency: "weekly",
-    priority: post.featured ? 0.9 : 0.8,
-  }));
+  if (sitemapId.startsWith("tags-")) {
+    const page = parseInt(sitemapId.replace("tags-", ""), 10) || 1;
+    return await getSitemapTagsChunk(page, baseUrl);
+  }
+
+  if (sitemapId.startsWith("authors-")) {
+    const page = parseInt(sitemapId.replace("authors-", ""), 10) || 1;
+    return await getSitemapAuthorsChunk(page, baseUrl);
+  }
+
+  const numeric = parseInt(sitemapId, 10);
+  if (!isNaN(numeric) && numeric > 0) {
+    return await getSitemapPostsChunk(numeric, baseUrl);
+  }
+
+  return await getSitemapCoreRoutes(baseUrl);
 }

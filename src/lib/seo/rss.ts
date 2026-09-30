@@ -20,7 +20,8 @@ function escapeXml(unsafe: string): string {
 export function generateRssFeed(
   siteTitleOrPosts: string | RssItem[],
   siteDescriptionOrPosts?: string | RssItem[],
-  optionalPosts?: RssItem[]
+  optionalPosts?: RssItem[],
+  feedUrl?: string
 ): string {
   const baseUrl = getBaseUrl();
   const buildDate = new Date().toUTCString();
@@ -40,6 +41,8 @@ export function generateRssFeed(
       posts = siteDescriptionOrPosts;
     }
   }
+
+  const activeFeedUrl = feedUrl || `${baseUrl}/feed.xml`;
 
   const itemsXml = posts
     .map((post) => {
@@ -67,7 +70,7 @@ export function generateRssFeed(
   <channel>
     <title>${escapeXml(title)}</title>
     <link>${baseUrl}</link>
-    <atom:link href="${baseUrl}/feed.xml" rel="self" type="application/rss+xml"/>
+    <atom:link href="${activeFeedUrl}" rel="self" type="application/rss+xml"/>
     <description>${escapeXml(description)}</description>
     <language>en-us</language>
     <lastBuildDate>${buildDate}</lastBuildDate>
