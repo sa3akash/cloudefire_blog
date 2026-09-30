@@ -4,7 +4,7 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2024-12-30",
   "compatibility_flags": ["nodejs_compat"],
-  "workers_dev": true,
+  "workers_dev": false,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -18,7 +18,7 @@
     }
   ],
   "vars": {
-    "SITE_URL": "http://localhost:3000",
+    "SITE_URL": "https://blogbd.eu.cc",
     "SITE_NAME": "CloudBlog"
   },
   "routes": [
@@ -26,5 +26,5 @@
       "pattern": "blogbd.eu.cc",
       "custom_domain": true
     }
-  ],
+  ]
 }
