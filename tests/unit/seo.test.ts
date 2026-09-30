@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateArticleJsonLd, generateRssFeed, buildArticleMetadata } from "@/lib/seo";
+import { generateArticleJsonLd, generateRssFeed, buildArticleMetadata, getBaseUrl } from "@/lib/seo";
 
 describe("SEO & Syndication Utilities", () => {
   it("should generate valid schema.org BlogPosting JSON-LD", () => {
@@ -19,6 +19,7 @@ describe("SEO & Syndication Utilities", () => {
   });
 
   it("should generate valid RSS feed XML", () => {
+    const baseUrl = getBaseUrl();
     const rss = generateRssFeed("CloudBlog", "A fast blog", [
       {
         title: "First Post & Update",
@@ -31,7 +32,7 @@ describe("SEO & Syndication Utilities", () => {
 
     expect(rss).toContain("<rss version=\"2.0\"");
     expect(rss).toContain("<title>First Post &amp; Update</title>");
-    expect(rss).toContain("<guid isPermaLink=\"true\">http://localhost:3000/blog/first-post</guid>");
+    expect(rss).toContain(`<guid isPermaLink="true">${baseUrl}/blog/first-post</guid>`);
   });
 
   it("should build proper Next.js metadata", () => {
