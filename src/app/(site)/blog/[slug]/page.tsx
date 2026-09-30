@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Suspense } from "react";
 import {
   getPostBySlug,
   getRelatedPosts,
@@ -23,6 +24,7 @@ import { ArticleHeader } from "@/components/blog/article-header";
 import { ArticleNavigation } from "@/components/blog/article-navigation";
 import { ArticleTags } from "@/components/blog/article-tags";
 import { RelatedPosts } from "@/components/blog/related-posts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -47,11 +49,45 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   });
 }
 
+// ─── Streamed sections ──────────────────────────────────────────────────────
+
+async function RelatedPostsSection({
+  postId,
+  categoryId,
+}: {
+  postId: string;
+  categoryId: string | null;
+}) {
+  const relatedPosts = await getRelatedPosts(postId, categoryId, 3);
+  return <RelatedPosts posts={relatedPosts} />;
+}
+
+async function CommentsSectionLoader({
+  postId,
+  allowComments,
+}: {
+  postId: string;
+  allowComments: boolean;
+}) {
+  if (!allowComments) return null;
+  const comments = await getApprovedCommentsForPost(postId);
+  return <CommentsSection postId={postId} initialComments={comments} />;
+}
+
+// ─── Page ───────────────────────────────────────────────────────────────────
+
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const resolved = await params;
-  const post = await getPostBySlug(resolved.slug);
+
+  // Fetch post and critical data in parallel
+  const [post, allowCommentsSetting] = await Promise.all([
+    getPostBySlug(resolved.slug),
+    getSetting("allowComments", "true"),
+  ]);
+
   if (!post) notFound();
 
+  // Fire-and-forget view counter
   try {
     const headerList = await headers();
     const ip = headerList.get("cf-connecting-ip") || headerList.get("x-forwarded-for") || "anonymous";
@@ -62,15 +98,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     // Edge case if headers not available
   }
 
-  const [renderedContent, headings, comments, relatedPosts, adjacent, allowCommentsSetting] =
-    await Promise.all([
-      renderMarkdown(post.content),
-      Promise.resolve(extractHeadings(post.content)),
-      getApprovedCommentsForPost(post.id),
-      getRelatedPosts(post.id, post.categoryId, 3),
-      getAdjacentPosts(post.publishedAt),
-      getSetting("allowComments", "true"),
-    ]);
+  // Critical content — needed before streaming
+  const [renderedContent, adjacent] = await Promise.all([
+    renderMarkdown(post.content),
+    getAdjacentPosts(post.publishedAt),
+  ]);
+  const headings = extractHeadings(post.content);
 
   const jsonLd = generateArticleJsonLd({
     title: post.title,
@@ -92,6 +125,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   ]);
 
   const fullUrl = `${getBaseUrl()}/blog/${post.slug}`;
+  const allowComments = allowCommentsSetting === "true";
 
   return (
     <article className="container mx-auto max-w-5xl px-4 sm:px-6 py-10 sm:py-16 space-y-12">
@@ -121,9 +155,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <ShareButtons title={post.title} url={fullUrl} />
           </div>
           <ArticleNavigation author={post.author} adjacent={adjacent} />
-          {allowCommentsSetting === "true" && (
-            <CommentsSection postId={post.id} initialComments={comments} />
-          )}
+
+          {/* Comments streamed separately for fast TTFB */}
+          <Suspense
+            fallback={
+              <div className="space-y-4 pt-4 animate-pulse">
+                <Skeleton className="h-6 w-40 rounded" />
+                <Skeleton className="h-24 w-full rounded-xl" />
+                <Skeleton className="h-24 w-full rounded-xl" />
+              </div>
+            }
+          >
+            <CommentsSectionLoader postId={post.id} allowComments={allowComments} />
+          </Suspense>
         </div>
 
         {headings.length > 0 && (
@@ -136,7 +180,21 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         )}
       </div>
 
-      <RelatedPosts posts={relatedPosts} />
+      {/* Related posts streamed separately */}
+      <Suspense
+        fallback={
+          <div className="space-y-4 animate-pulse">
+            <Skeleton className="h-7 w-44 rounded-lg" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-64 w-full rounded-2xl" />
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <RelatedPostsSection postId={post.id} categoryId={post.categoryId} />
+      </Suspense>
     </article>
   );
 }
