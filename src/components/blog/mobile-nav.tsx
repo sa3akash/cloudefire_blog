@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -26,15 +26,15 @@ export function MobileNav() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden h-9 w-9 text-muted-foreground"
-          aria-label="Open navigation menu"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+      <SheetTrigger
+        className={buttonVariants({
+          variant: "ghost",
+          size: "icon",
+          className: "md:hidden h-9 w-9 text-muted-foreground",
+
+        })}
+      >
+        <Menu className="h-5 w-5" />
       </SheetTrigger>
       <SheetContent side="right" className="w-72 sm:w-80 p-6">
         <SheetHeader className="text-left pb-6 border-b border-border/50">

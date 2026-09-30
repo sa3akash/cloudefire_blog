@@ -107,7 +107,7 @@ export default function HomePage() {
   );
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 space-y-16 sm:space-y-20">
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-16 sm:space-y-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: websiteJsonLd }} />
 
       {/* Hero renders immediately — no data needed */}

@@ -55,7 +55,7 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
   ]);
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10" >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
 
       <div className="space-y-3 border-b border-border/60 pb-8 text-center sm:text-left">
@@ -71,23 +71,25 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
         </p>
       </div>
 
-      {postsData.posts.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-border rounded-xl text-muted-foreground">
-          No articles found for this tag yet.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {postsData.posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      )}
-
-      <PaginationBar
-        currentPage={postsData.page}
-        totalPages={postsData.totalPages}
-        basePath={`/tag/${tag.slug}`}
-      />
+  {
+    postsData.posts.length === 0 ? (
+      <div className="text-center py-16 border border-dashed border-border rounded-xl text-muted-foreground">
+        No articles found for this tag yet.
+      </div>
+    ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {postsData.posts.map((post) => (
+        <PostCard key={post.id} post={post} />
+      ))}
     </div>
+  )
+  }
+
+  <PaginationBar
+    currentPage={postsData.page}
+    totalPages={postsData.totalPages}
+    basePath={`/tag/${tag.slug}`}
+  />
+    </div >
   );
 }

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function CategoryNotFound() {
   return (
-    <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-20 text-center space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 py-20 text-center space-y-6" >
       <div className="w-20 h-20 rounded-2xl bg-muted border border-border/80 flex items-center justify-center mx-auto">
         <Folder className="w-9 h-9 text-muted-foreground" />
       </div>
@@ -28,6 +28,6 @@ export default function CategoryNotFound() {
           <span>Browse Articles</span>
         </Link>
       </Button>
-    </div>
+    </div >
   );
 }
