@@ -12,7 +12,7 @@ export async function getPostVersionsAction(postId: string): Promise<ActionResul
   await requireAuth();
   try {
     const versions = await getPostVersions(postId);
-    return { success: true, data: versions };
+    return { success: true, message: "Versions loaded", data: versions };
   } catch (error) {
     return {
       success: false,
@@ -25,7 +25,7 @@ export async function getPostVersionDetailAction(versionId: string): Promise<Act
   await requireAuth();
   try {
     const version = await getPostVersionById(versionId);
-    return { success: true, data: version };
+    return { success: true, message: "Version loaded", data: version };
   } catch (error) {
     return {
       success: false,

@@ -124,9 +124,22 @@ export async function deletePostAction(id: string): Promise<ActionResult> {
 }
 
 export async function duplicatePostAction(id: string): Promise<ActionResult> {
-  await requireAuth();
+  const user = await requireAuth();
   try {
-    const newId = await duplicatePost(id);
+    const db = getDb();
+    const authorRes = await db
+      .select({ id: authors.id })
+      .from(authors)
+      .where(eq(authors.userId, user.id))
+      .limit(1);
+    let authorId = authorRes[0]?.id;
+    if (!authorId) {
+      const fallback = await db.select({ id: authors.id }).from(authors).limit(1);
+      authorId = fallback[0]?.id;
+    }
+    if (!authorId) return { success: false, message: "Author not found" };
+
+    const newId = await duplicatePost(id, authorId);
     revalidatePath("/admin/posts");
     return { success: true, message: "Article duplicated as draft", data: { id: newId } };
   } catch (err: unknown) {
