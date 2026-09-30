@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   SESSION_COOKIE_NAME,
-  createSession,
   validateSession,
   invalidateSession,
 } from "./session";

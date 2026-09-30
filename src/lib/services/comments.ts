@@ -1,4 +1,4 @@
-import { getDb, comments, posts, type Comment } from "@/lib/db";
+import { getDb, comments, posts } from "@/lib/db";
 import { eq, desc, and, count } from "drizzle-orm";
 import { getSetting } from "./settings";
 

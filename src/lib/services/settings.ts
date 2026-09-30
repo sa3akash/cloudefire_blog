@@ -1,4 +1,4 @@
-import { getDb, siteSettings, type SiteSetting } from "@/lib/db";
+import { getDb, siteSettings } from "@/lib/db";
 import { eq } from "drizzle-orm";
 
 export async function getAllSettings(): Promise<Record<string, string>> {

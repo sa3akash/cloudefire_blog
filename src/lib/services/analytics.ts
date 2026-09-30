@@ -1,5 +1,5 @@
-import { getDb, posts, comments, postViews, categories } from "@/lib/db";
-import { eq, count, desc, sql } from "drizzle-orm";
+import { getDb, posts, comments, postViews } from "@/lib/db";
+import { eq, count, desc } from "drizzle-orm";
 
 export interface DashboardMetrics {
   totalPosts: number;

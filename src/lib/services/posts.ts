@@ -1,4 +1,4 @@
-import { getDb, posts, categories, authors, postTags, tags, postViews, type Post, type NewPost } from "@/lib/db";
+import { getDb, posts, categories, authors, postTags, tags, postViews } from "@/lib/db";
 import { eq, desc, asc, and, like, or, count, sql, inArray } from "drizzle-orm";
 import { calculateReadingTime } from "@/lib/markdown";
 

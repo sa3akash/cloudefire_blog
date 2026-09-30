@@ -1,5 +1,5 @@
-import { getDb, categories, posts, type Category, type NewCategory } from "@/lib/db";
-import { eq, count, sql } from "drizzle-orm";
+import { getDb, categories, posts, type Category } from "@/lib/db";
+import { eq, count } from "drizzle-orm";
 
 export async function getAllCategories(): Promise<(Category & { postCount: number })[]> {
   const db = getDb();

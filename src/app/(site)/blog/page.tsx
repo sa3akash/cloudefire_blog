@@ -1,6 +1,5 @@
 import { getPublishedPosts } from "@/lib/services/posts";
 import { getAllCategories } from "@/lib/services/categories";
-import { getAllTags } from "@/lib/services/tags";
 import { PostCard } from "@/components/blog/post-card";
 import { PaginationBar } from "@/components/blog/pagination-bar";
 import { Badge } from "@/components/ui/badge";

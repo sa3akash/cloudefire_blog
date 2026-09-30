@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Calendar, ArrowRight, Tag } from "lucide-react";
+import { Clock, Calendar } from "lucide-react";
 import type { PostListItem } from "@/lib/services/posts";
 import { Badge } from "@/components/ui/badge";
 

@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import {
   Bold,
   Italic,
-  Heading1,
   Heading2,
   Heading3,
   Link as LinkIcon,
@@ -12,7 +11,6 @@ import {
   ListOrdered,
   Quote,
   Code,
-  Image as ImageIcon,
   Table as TableIcon,
   Minus,
   Eye,

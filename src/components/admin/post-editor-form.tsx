@@ -6,18 +6,13 @@ import { MarkdownEditor } from "@/components/admin/markdown-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { savePostAction, uploadMediaAction } from "@/app/actions/admin";
 import { generateSlug } from "@/lib/validation";
 import {
-  Save,
   Globe,
   Upload,
-  Sparkles,
   AlertCircle,
   CheckCircle2,
-  Calendar,
-  Layers,
   Search,
   Loader2,
 } from "lucide-react";
@@ -486,6 +481,19 @@ export function PostEditorForm({
               <span className="text-[10px] text-muted-foreground font-mono">
                 {seoDescription.length}/160 chars
               </span>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[11px] text-muted-foreground font-medium" htmlFor="canonicalUrl">
+                Canonical URL (Optional)
+              </label>
+              <Input
+                id="canonicalUrl"
+                value={canonicalUrl}
+                onChange={(e) => setCanonicalUrl(e.target.value)}
+                placeholder="https://yourdomain.com/blog/slug"
+                className="h-8 text-xs font-mono"
+              />
             </div>
           </div>
         </aside>

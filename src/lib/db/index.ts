@@ -12,8 +12,8 @@ export function setTestDb(db: DrizzleD1Database<typeof schema> | null) {
 
 function createStubD1Database(): D1Database {
   const statement = {
-    bind: (..._args: unknown[]) => statement,
-    first: async <T = unknown>(_col?: string) => null as T | null,
+    bind: () => statement,
+    first: async <T = unknown>() => null as T | null,
     all: async <T = unknown>() => ({
       results: [] as T[],
       success: true,
@@ -46,10 +46,10 @@ function createStubD1Database(): D1Database {
   } as unknown as D1PreparedStatement;
 
   return {
-    prepare: (_query: string) => statement,
+    prepare: () => statement,
     dump: async () => new ArrayBuffer(0),
-    batch: async <T = unknown>(_statements: D1PreparedStatement[]) => [] as D1Result<T>[],
-    exec: async (_query: string) => ({ count: 0, duration: 0 }),
+    batch: async <T = unknown>() => [] as D1Result<T>[],
+    exec: async () => ({ count: 0, duration: 0 }),
   } as unknown as D1Database;
 }
 
