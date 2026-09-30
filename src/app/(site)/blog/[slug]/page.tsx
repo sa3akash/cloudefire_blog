@@ -17,7 +17,7 @@ import { ShareButtons } from "@/components/blog/share-buttons";
 import { CommentsSection } from "@/components/blog/comments-section";
 import { PostCard } from "@/components/blog/post-card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Calendar, ChevronLeft, ChevronRight, User } from "lucide-react";
+import { Clock, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { headers } from "next/headers";
 
 interface ArticlePageProps {

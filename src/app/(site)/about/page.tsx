@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getSetting } from "@/lib/services/settings";
-import { Cloud, Cpu, Database, HardDrive, ShieldCheck, Zap, Layers, Sparkles } from "lucide-react";
+import { Cpu, Database, HardDrive, ShieldCheck, Zap, Layers, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 

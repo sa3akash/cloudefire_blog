@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getSetting } from "@/lib/services/settings";
-import { Mail, MessageSquare, Send, Sparkles } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";

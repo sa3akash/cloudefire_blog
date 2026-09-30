@@ -3,16 +3,13 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Upload,
   Copy,
   Check,
   Trash2,
-  Image as ImageIcon,
   Loader2,
-  FileCheck,
 } from "lucide-react";
 import { uploadMediaAction, deleteMediaAction } from "@/app/actions/admin";
 import type { Media } from "@/lib/db";

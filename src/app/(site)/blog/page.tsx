@@ -6,7 +6,7 @@ import { PaginationBar } from "@/components/blog/pagination-bar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, SlidersHorizontal, BookOpen } from "lucide-react";
+import { Search, BookOpen } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -33,7 +33,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const sort = resolvedParams.sort || "newest";
   const search = resolvedParams.q;
 
-  const [postsData, categoriesList, tagsList] = await Promise.all([
+  const [postsData, categoriesList] = await Promise.all([
     getPublishedPosts({
       page,
       limit: 9,
@@ -43,7 +43,6 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       search,
     }),
     getAllCategories(),
-    getAllTags(),
   ]);
 
   return (

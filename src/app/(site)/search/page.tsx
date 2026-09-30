@@ -3,7 +3,7 @@ import { PostCard } from "@/components/blog/post-card";
 import { PaginationBar } from "@/components/blog/pagination-bar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search as SearchIcon, Sparkles } from "lucide-react";
+import { Search as SearchIcon } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

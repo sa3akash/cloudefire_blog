@@ -1,13 +1,12 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { getDb, authors } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { getPublishedPosts } from "@/lib/services/posts";
 import { PostCard } from "@/components/blog/post-card";
 import { PaginationBar } from "@/components/blog/pagination-bar";
 import type { Metadata } from "next";
-import { User, Globe } from "lucide-react";
+import { User } from "lucide-react";
 
 interface AuthorPageProps {
   params: Promise<{

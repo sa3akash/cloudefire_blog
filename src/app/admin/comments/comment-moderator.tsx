@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Trash2, ExternalLink, Loader2 } from "lucide-react";
+import { Check, X, Trash2, ExternalLink } from "lucide-react";
 import { moderateCommentAction, deleteCommentAction } from "@/app/actions/admin";
 
 interface CommentRow {

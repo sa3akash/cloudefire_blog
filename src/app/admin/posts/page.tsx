@@ -1,7 +1,7 @@
 import { requireAuth } from "@/lib/auth";
 import { getAllPostsForAdmin } from "@/lib/services/posts";
 import Link from "next/link";
-import { PlusCircle, Search, Filter, FileText } from "lucide-react";
+import { PlusCircle, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";

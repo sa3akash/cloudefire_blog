@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getDb, users, authors, media, type NewMedia } from "@/lib/db";
+import { getDb, users, authors, media } from "@/lib/db";
 import { eq, count } from "drizzle-orm";
 import {
   hashPassword,
@@ -10,7 +10,6 @@ import {
   createSession,
   setSessionCookie,
   clearSessionCookie,
-  getCurrentUser,
   requireAuth,
   checkRateLimit,
 } from "@/lib/auth";

@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Tag as TagIcon, Trash2, Plus, Loader2 } from "lucide-react";
+import { Trash2, Plus, Loader2 } from "lucide-react";
 import { saveTagAction, deleteTagAction } from "@/app/actions/admin";
 import type { Tag } from "@/lib/db";
 
