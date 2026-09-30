@@ -1,7 +1,6 @@
 "use client";
 
-import { Wand2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,16 +18,16 @@ interface SnippetsDropdownProps {
 export function SnippetsDropdown({ onInsertSnippet }: SnippetsDropdownProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-        >
-          <Wand2 className="w-3.5 h-3.5 text-primary" />
-          <span>Snippets</span>
-        </Button>
+      <DropdownMenuTrigger
+        className={buttonVariants({
+          variant: "outline",
+          size: "sm",
+          className: "h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+        })}
+      >
+        <Wand2 className="w-3.5 h-3.5 text-primary" />
+        <span>Snippets</span>
+
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="start" className="w-56">
