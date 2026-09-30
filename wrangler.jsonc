@@ -17,12 +17,6 @@
       "migrations_dir": "drizzle"
     }
   ],
-  "r2_buckets": [
-    {
-      "binding": "MEDIA_BUCKET",
-      "bucket_name": "cloudblog-media"
-    }
-  ],
   "vars": {
     "SITE_URL": "http://localhost:3000",
     "SITE_NAME": "CloudBlog"

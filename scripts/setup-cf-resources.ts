@@ -60,13 +60,30 @@ if (targetKvId && !targetKvId.includes("00000000")) {
     console.log(`==> Attached optional KV Namespace: ${targetKvId}`);
   }
 } else {
-  // Strip any dummy KV namespace if present
   configRaw = configRaw.replace(/,\s*"kv_namespaces":\s*\[[^\]]+\]/g, "");
   configRaw = configRaw.replace(/"kv_namespaces":\s*\[[^\]]+\]\s*,?/g, "");
 }
 
-// 3. Ensure R2 Bucket Exists
-runCommand("bun x wrangler r2 bucket create cloudblog-media");
+// 3. Ensure R2 Bucket Exists (Auto-bind only if bucket exists or was created)
+const r2List = runCommand("bun x wrangler r2 bucket list");
+let r2Available = r2List.includes("cloudblog-media");
+if (!r2Available) {
+  const r2Create = runCommand("bun x wrangler r2 bucket create cloudblog-media");
+  if (r2Create.includes("cloudblog-media") || r2Create.includes("Created bucket")) {
+    r2Available = true;
+  }
+}
+if (r2Available) {
+  if (!configRaw.includes('"r2_buckets"')) {
+    const r2Snippet = `"r2_buckets": [\n    {\n      "binding": "MEDIA_BUCKET",\n      "bucket_name": "cloudblog-media"\n    }\n  ],`;
+    configRaw = configRaw.replace(/"vars":/, `${r2Snippet}\n  "vars":`);
+    console.log("==> Attached verified R2 Bucket 'cloudblog-media'");
+  }
+} else {
+  configRaw = configRaw.replace(/,\s*"r2_buckets":\s*\[[^\]]+\]/g, "");
+  configRaw = configRaw.replace(/"r2_buckets":\s*\[[^\]]+\]\s*,?/g, "");
+  console.log("ℹ️ R2 bucket 'cloudblog-media' not available. Skipping R2 binding (fallback storage active).");
+}
 
 // 4. Custom Domain & Subdomain Handling
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim() || "";

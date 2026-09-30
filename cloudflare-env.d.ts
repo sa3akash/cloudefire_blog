@@ -3,7 +3,7 @@
 declare global {
   interface CloudflareEnv {
     DB: D1Database;
-    MEDIA_BUCKET: R2Bucket;
+    MEDIA_BUCKET?: R2Bucket;
     KV?: KVNamespace;
     ASSETS?: Fetcher;
     SITE_URL?: string;
