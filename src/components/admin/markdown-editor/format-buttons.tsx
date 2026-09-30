@@ -3,13 +3,17 @@
 import {
   Bold,
   Italic,
+  Strikethrough,
   Heading2,
   Heading3,
   Link as LinkIcon,
   List,
   ListOrdered,
+  CheckSquare,
   Quote,
   Code,
+  Workflow,
+  FolderTree,
   Table as TableIcon,
   Minus,
 } from "lucide-react";
@@ -20,122 +24,43 @@ interface FormatButtonsProps {
 }
 
 export function FormatButtons({ insertText }: FormatButtonsProps) {
+  const btn = (
+    title: string,
+    icon: React.ReactNode,
+    onClick: () => void
+  ) => (
+    <Button
+      key={title}
+      type="button"
+      variant="ghost"
+      size="sm"
+      onClick={onClick}
+      className="h-8 w-8 p-0"
+      title={title}
+    >
+      {icon}
+    </Button>
+  );
+
   return (
-    <>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("## ", "", "Heading 2")}
-        className="h-8 w-8 p-0"
-        title="Heading 2"
-      >
-        <Heading2 className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("### ", "", "Heading 3")}
-        className="h-8 w-8 p-0"
-        title="Heading 3"
-      >
-        <Heading3 className="h-4 w-4" />
-      </Button>
+    <div className="flex items-center gap-0.5">
+      {btn("Heading 2", <Heading2 className="h-4 w-4" />, () => insertText("## ", "", "Heading 2"))}
+      {btn("Heading 3", <Heading3 className="h-4 w-4" />, () => insertText("### ", "", "Heading 3"))}
       <div className="w-px h-5 bg-border mx-1" />
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("**", "**", "bold text")}
-        className="h-8 w-8 p-0"
-        title="Bold"
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("*", "*", "italic text")}
-        className="h-8 w-8 p-0"
-        title="Italic"
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("[", "](https://example.com)", "link text")}
-        className="h-8 w-8 p-0"
-        title="Insert Link"
-      >
-        <LinkIcon className="h-4 w-4" />
-      </Button>
+      {btn("Bold (Ctrl+B)", <Bold className="h-4 w-4" />, () => insertText("**", "**", "bold text"))}
+      {btn("Italic (Ctrl+I)", <Italic className="h-4 w-4" />, () => insertText("*", "*", "italic text"))}
+      {btn("Strikethrough", <Strikethrough className="h-4 w-4" />, () => insertText("~~", "~~", "strikethrough text"))}
+      {btn("Insert Link (Ctrl+K)", <LinkIcon className="h-4 w-4" />, () => insertText("[", "](https://example.com)", "link text"))}
       <div className="w-px h-5 bg-border mx-1" />
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("\n- ", "", "list item")}
-        className="h-8 w-8 p-0"
-        title="Unordered List"
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("\n1. ", "", "list item")}
-        className="h-8 w-8 p-0"
-        title="Ordered List"
-      >
-        <ListOrdered className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("\n> ", "", "quote")}
-        className="h-8 w-8 p-0"
-        title="Blockquote"
-      >
-        <Quote className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("\n```typescript\n", "\n```\n", "// code here")}
-        className="h-8 w-8 p-0"
-        title="Code Block"
-      >
-        <Code className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() =>
-          insertText("\n| Column 1 | Column 2 |\n| :--- | :--- |\n| Data 1 | Data 2 |\n")
-        }
-        className="h-8 w-8 p-0"
-        title="Insert Table"
-      >
-        <TableIcon className="h-4 w-4" />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => insertText("\n---\n")}
-        className="h-8 w-8 p-0"
-        title="Horizontal Divider"
-      >
-        <Minus className="h-4 w-4" />
-      </Button>
-    </>
+      {btn("Unordered List", <List className="h-4 w-4" />, () => insertText("\n- ", "", "list item"))}
+      {btn("Ordered List", <ListOrdered className="h-4 w-4" />, () => insertText("\n1. ", "", "list item"))}
+      {btn("Task Checklist", <CheckSquare className="h-4 w-4" />, () => insertText("\n- [ ] ", "", "task description"))}
+      {btn("Blockquote", <Quote className="h-4 w-4" />, () => insertText("\n> ", "", "quote"))}
+      {btn("Code Block", <Code className="h-4 w-4" />, () => insertText("\n```typescript:src/index.ts\n", "\n```\n", "// code here"))}
+      {btn("Mermaid Diagram", <Workflow className="h-4 w-4 text-primary" />, () => insertText("\n```mermaid\ngraph TD\n  Client([Browser]) --> Worker[Edge Worker]\n  Worker --> D1[(D1 Database)]\n```\n"))}
+      {btn("Repository Structure", <FolderTree className="h-4 w-4 text-amber-500" />, () => insertText("\n```filetree\nproject/\n├── src/\n│   ├── components/\n│   └── lib/\n├── package.json\n└── README.md\n```\n"))}
+      {btn("Table", <TableIcon className="h-4 w-4" />, () => insertText("\n| Feature | Value |\n| :--- | :--- |\n| Item 1 | Detail 1 |\n"))}
+      {btn("Divider", <Minus className="h-4 w-4" />, () => insertText("\n---\n"))}
+    </div>
   );
 }

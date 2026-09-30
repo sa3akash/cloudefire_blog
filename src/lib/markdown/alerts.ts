@@ -1,8 +1,6 @@
 export interface AlertConfig {
   type: "note" | "tip" | "important" | "warning" | "caution";
   title: string;
-  badgeClass: string;
-  containerClass: string;
   iconSvg: string;
 }
 
@@ -10,50 +8,45 @@ const ALERT_CONFIGS: Record<string, AlertConfig> = {
   note: {
     type: "note",
     title: "Note",
-    badgeClass: "text-blue-600 dark:text-blue-400 border-blue-500/25 bg-blue-500/10 shadow-blue-500/5",
-    containerClass: "border-blue-500/35 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent",
-    iconSvg: `<svg class="w-3.5 h-3.5 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="12" y1="16" x2="12" y2="12" stroke-width="2"/><line x1="12" y1="8" x2="12.01" y2="8" stroke-width="2"/></svg>`,
+    iconSvg: `<svg class="octicon octicon-info" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg>`,
   },
   tip: {
     type: "tip",
     title: "Tip",
-    badgeClass: "text-emerald-600 dark:text-emerald-400 border-emerald-500/25 bg-emerald-500/10 shadow-emerald-500/5",
-    containerClass: "border-emerald-500/35 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent",
-    iconSvg: `<svg class="w-3.5 h-3.5 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`,
+    iconSvg: `<svg class="octicon octicon-light-bulb" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.09-.107-.18-.214-.27-.323C3.176 7.636 2.5 6.643 2.5 5.25 2.5 2.368 4.793 0 8 0s5.5 2.368 5.5 5.25c0 1.393-.676 2.386-1.326 3.155l-.27.323c-.167.199-.348.423-.542.68-.207.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5Zm1 3h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1 0-1.5Z"/></svg>`,
   },
   important: {
     type: "important",
     title: "Important",
-    badgeClass: "text-purple-600 dark:text-purple-400 border-purple-500/25 bg-purple-500/10 shadow-purple-500/5",
-    containerClass: "border-purple-500/35 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent",
-    iconSvg: `<svg class="w-3.5 h-3.5 text-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/></svg>`,
+    iconSvg: `<svg class="octicon octicon-report" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H9.06l-2.573 2.573A1.458 1.458 0 0 1 4 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v4a.75.75 0 0 1-1.5 0v-4a.75.75 0 0 1 1.5 0ZM7.25 10a.75.75 0 1 1 1.5 0 .75.75 0 0 1-1.5 0Z"/></svg>`,
   },
   warning: {
     type: "warning",
     title: "Warning",
-    badgeClass: "text-amber-600 dark:text-amber-400 border-amber-500/25 bg-amber-500/10 shadow-amber-500/5",
-    containerClass: "border-amber-500/35 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent",
-    iconSvg: `<svg class="w-3.5 h-3.5 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
+    iconSvg: `<svg class="octicon octicon-alert" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/></svg>`,
   },
   caution: {
     type: "caution",
     title: "Caution",
-    badgeClass: "text-rose-600 dark:text-rose-400 border-rose-500/25 bg-rose-500/10 shadow-rose-500/5",
-    containerClass: "border-rose-500/35 bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent",
-    iconSvg: `<svg class="w-3.5 h-3.5 text-rose-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+    iconSvg: `<svg class="octicon octicon-stop" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M4.47.047A1.75 1.75 0 0 1 5.71 0h4.58c.464 0 .909.184 1.237.513l3.96 3.96c.329.328.513.773.513 1.237v4.58c0 .464-.184.909-.513 1.237l-3.96 3.961c-.328.328-.773.512-1.237.512H5.71a1.75 1.75 0 0 1-1.237-.512l-3.96-3.961A1.75 1.75 0 0 1 0 10.29V5.71c0-.464.184-.909.513-1.237l3.96-3.96A1.75 1.75 0 0 1 4.47.047Zm.53 1.503a.25.25 0 0 0-.177.073L1.62 5.023a.25.25 0 0 0-.073.177v4.58c0 .066.026.13.073.177l3.203 3.203a.25.25 0 0 0 .177.073h4.58a.25.25 0 0 0 .177-.073l3.203-3.203a.25.25 0 0 0 .073-.177V5.2a.25.25 0 0 0-.073-.177L9.753 1.623a.25.25 0 0 0-.177-.073ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 6.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"/></svg>`,
   },
 };
 
 export function processBlockquote(quoteHtml: string): string {
-  const match = quoteHtml.match(/<p>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*<br\s*\/?>)?([\s\S]*?)<\/p>/i);
+  const match = quoteHtml.match(/^(?:<p>)?\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:\s*<br\s*\/?>|\n)?([\s\S]*?)(?:<\/p>)?$/i);
   if (!match) {
-    return `<blockquote class="my-8 relative pl-6 pr-5 py-4 rounded-2xl border-l-4 border-primary/70 bg-gradient-to-r from-primary/5 via-muted/20 to-transparent italic text-foreground/85 leading-relaxed text-base sm:text-lg shadow-xs"><div class="text-primary/20 select-none pointer-events-none font-serif text-3xl leading-none mb-1">&ldquo;</div><div class="relative z-10 space-y-2 [&>p]:m-0">${quoteHtml}</div></blockquote>`;
+    return `<blockquote class="gh-blockquote">${quoteHtml}</blockquote>`;
   }
 
   const alertType = match[1].toLowerCase();
   const alertContent = match[2].trim();
-  const remainingContent = quoteHtml.replace(match[0], alertContent ? `<p>${alertContent}</p>` : "");
   const config = ALERT_CONFIGS[alertType] || ALERT_CONFIGS.note;
 
-  return `<div class="my-7 rounded-2xl border p-5 sm:p-6 shadow-xs ${config.containerClass} relative overflow-hidden backdrop-blur-xs"><div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wide border shadow-xs mb-3 ${config.badgeClass}">${config.iconSvg}<span>${config.title}</span></div><div class="text-sm sm:text-base leading-relaxed text-foreground/90 space-y-2 [&>p]:m-0">${remainingContent}</div></div>`;
+  return `<div class="markdown-alert markdown-alert-${config.type}">
+  <p class="markdown-alert-title" dir="auto">
+    ${config.iconSvg}
+    <span>${config.title}</span>
+  </p>
+  <div class="markdown-alert-content"><p>${alertContent}</p></div>
+</div>`;
 }

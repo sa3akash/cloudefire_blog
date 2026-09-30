@@ -4,7 +4,7 @@ export const programmingTutorialTemplate: ArticleTemplate = {
   id: "programming-tutorial",
   name: "Programming Tutorial",
   category: "Developer",
-  description: "Step-by-step code tutorial with prerequisites, implementation, and code blocks.",
+  description: "Step-by-step code tutorial with architecture diagram, repository tree, and code blocks.",
   defaultTitle: "How to Build a [Feature] with [Technology]",
   content: `## Introduction
 
@@ -23,14 +23,29 @@ A concise explanation of what we are building and the problem it solves.
 
 ## Architecture Overview
 
-Briefly explain the design choices and system flow.
+Briefly explain the design choices and system flow:
 
-\`\`\`typescript
-// src/example.ts
-export interface ExampleConfig {
-  apiKey: string;
-  timeoutMs: number;
-}
+\`\`\`mermaid
+graph TD
+  Client([Web Browser]) --> API[Next.js API Handler]
+  API --> DB[(Cloudflare D1 Database)]
+\`\`\`
+
+---
+
+## Repository Structure
+
+\`\`\`filetree
+my-app/
+├── src/
+│   ├── components/
+│   │   └── feature-card.tsx    # Interactive UI component
+│   ├── lib/
+│   │   └── api-client.ts       # Type-safe API client
+│   ├── App.tsx
+│   └── main.tsx
+├── package.json
+└── tsconfig.json
 \`\`\`
 
 ---
@@ -49,7 +64,20 @@ npm install
 
 ## Step 2: Implementation
 
-Walk through the code step-by-step.
+Walk through the code step-by-step:
+
+\`\`\`typescript:src/lib/api-client.ts
+export interface ApiConfig {
+  baseUrl: string;
+  timeoutMs: number;
+}
+
+export async function fetchPosts(config: ApiConfig) {
+  const response = await fetch(\`\${config.baseUrl}/posts\`);
+  if (!response.ok) throw new Error("Failed to fetch posts");
+  return response.json();
+}
+\`\`\`
 
 > [!TIP]
 > Use strict typing to catch edge cases during compile time rather than runtime.

@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { MermaidRunner } from "@/components/blog/mermaid-runner";
 
 interface ResponsivePreviewDialogProps {
   title: string;
@@ -41,13 +42,11 @@ export function ResponsivePreviewDialog({
         className={buttonVariants({
           variant: "outline",
           size: "sm",
-          className: "h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          className: "h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground",
         })}
       >
-
         <Eye className="w-3.5 h-3.5 text-primary" />
         <span>Device Preview</span>
-
       </DialogTrigger>
 
       <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl">
@@ -114,6 +113,7 @@ export function ResponsivePreviewDialog({
               className="prose-article"
               dangerouslySetInnerHTML={{ __html: renderedHtml }}
             />
+            <MermaidRunner contentKey={renderedHtml} />
           </div>
         </div>
       </DialogContent>

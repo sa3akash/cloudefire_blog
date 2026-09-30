@@ -1,89 +1,87 @@
 import hljs from "highlight.js";
+import { renderFileTree } from "./file-tree-renderer";
+import { escapeHtml } from "./utils";
 
-interface LangMeta {
-  label: string;
-  ext: string;
-  color: string;
-  icon: string;
+function extractFilename(rawLang: string | undefined, text: string): { lang: string; filename?: string; cleanText: string } {
+  let lang = (rawLang || "").trim();
+  let filename: string | undefined;
+  let cleanText = text;
+
+  if (lang.includes(":")) {
+    const parts = lang.split(":");
+    lang = parts[0];
+    filename = parts.slice(1).join(":");
+  } else {
+    const fileMatch = lang.match(/(?:filename|title)=["']?([^"'\s]+)["']?/i);
+    if (fileMatch) {
+      filename = fileMatch[1];
+      lang = lang.replace(fileMatch[0], "").trim();
+    }
+  }
+
+  if (!filename) {
+    const firstLine = text.trimStart().split("\n")[0];
+    const commentMatch = firstLine.match(/^(?:\/\/|#|\/\*)\s*([a-zA-Z0-9_\-./\\]+\.[a-zA-Z0-9]+)\s*(?:\*\/)?$/);
+    if (commentMatch) {
+      filename = commentMatch[1];
+      cleanText = text.replace(firstLine, "").trimStart();
+    }
+  }
+
+  return { lang: lang.toLowerCase(), filename, cleanText };
 }
 
-const LANG_META: Record<string, LangMeta> = {
-  javascript: { label: "JavaScript", ext: ".js", color: "#f7df1e", icon: `<path d="M3 3h18v18H3V3zm9.75 13.5c.41.72 1.02 1.25 2.14 1.25 1.14 0 1.87-.57 1.87-1.36 0-.94-.75-1.28-2-1.73l-.69-.29c-1.98-.84-3.3-1.9-3.3-4.13 0-2.05 1.56-3.62 4-3.62 1.73 0 2.97.6 3.87 2.18L17 10.7c-.47-.84-.97-1.17-1.75-1.17-.8 0-1.3.5-1.3 1.17 0 .82.51 1.15 1.68 1.66l.69.29c2.34.99 3.66 2.02 3.66 4.3 0 2.46-1.94 3.82-4.55 3.82-2.55 0-4.2-1.21-5-3.05l2.32-1.32z"/>` },
-  js: { label: "JavaScript", ext: ".js", color: "#f7df1e", icon: `<path d="M3 3h18v18H3V3zm9.75 13.5c.41.72 1.02 1.25 2.14 1.25 1.14 0 1.87-.57 1.87-1.36 0-.94-.75-1.28-2-1.73l-.69-.29c-1.98-.84-3.3-1.9-3.3-4.13 0-2.05 1.56-3.62 4-3.62 1.73 0 2.97.6 3.87 2.18L17 10.7c-.47-.84-.97-1.17-1.75-1.17-.8 0-1.3.5-1.3 1.17 0 .82.51 1.15 1.68 1.66l.69.29c2.34.99 3.66 2.02 3.66 4.3 0 2.46-1.94 3.82-4.55 3.82-2.55 0-4.2-1.21-5-3.05l2.32-1.32z"/>` },
-  typescript: { label: "TypeScript", ext: ".ts", color: "#3178c6", icon: `<path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/>` },
-  ts: { label: "TypeScript", ext: ".ts", color: "#3178c6", icon: `<path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/>` },
-  tsx: { label: "TSX", ext: ".tsx", color: "#3178c6", icon: `<path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/>` },
-  jsx: { label: "JSX", ext: ".jsx", color: "#61dafb", icon: `<path d="M12 2.2c-5.4 0-9.8 4.4-9.8 9.8s4.4 9.8 9.8 9.8 9.8-4.4 9.8-9.8-4.4-9.8-9.8-9.8zm0 18.2c-4.6 0-8.4-3.8-8.4-8.4s3.8-8.4 8.4-8.4 8.4 3.8 8.4 8.4-3.8 8.4-8.4 8.4z"/>` },
-  python: { label: "Python", ext: ".py", color: "#3572A5", icon: `<path d="M12 2C6.5 2 7 4.5 7 4.5V7h5v1H5S2 7.5 2 12.5 5 17 5 17h2v-2.5s-.1-3 3-3h5s3 0 3-3V4.5S17.5 2 12 2z"/>` },
-  py: { label: "Python", ext: ".py", color: "#3572A5", icon: `<path d="M12 2C6.5 2 7 4.5 7 4.5V7h5v1H5S2 7.5 2 12.5 5 17 5 17h2v-2.5s-.1-3 3-3h5s3 0 3-3V4.5S17.5 2 12 2z"/>` },
-  rust: { label: "Rust", ext: ".rs", color: "#dea584", icon: `<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.5h-2v-5h2zm0-7h-2V7.5h2z"/>` },
-  go: { label: "Go", ext: ".go", color: "#00add8", icon: `<path d="M2 10h4v1H2zm0 2h5v1H2zm12-2c-.7.2-1.2.3-2 .5-.2 0-.2.1-.3-.1-.2-.2-.3-.3-.5-.4-.7-.4-1.5-.3-2.1.2-.8.5-1.2 1.3-1.2 2.2 0 .9.7 1.7 1.6 1.8.8.1 1.5-.2 2-.8.1-.1.2-.3.3-.4h-2.8v-1.6h4.3v1c0 1.2-.3 2.1-.9 2.8-.8 1.1-1.9 1.8-3.3 2-1.1.2-2.2-.1-3.1-.8-.9-.7-1.4-1.5-1.5-2.6-.2-1.3.2-2.4 1-3.4.8-1.1 1.9-1.8 3.3-2 1.1-.2 2.2-.1 3.1.6.6.4 1.1 1 1.4 1.6.1.1 0 .2-.1.2z"/>` },
-  html: { label: "HTML", ext: ".html", color: "#e34c26", icon: `<path d="M2 3h20l-2 18-8 3-8-3L2 3zm6 7l-.2-3h12.4l.2-3H4.5l.7 9h11.2l-.3 3.5-4.1 1.1-4.1-1.1-.3-2.5H4.8l.4 5.2L12 20.3l6.8-1.9.9-10.4H8z"/>` },
-  css: { label: "CSS", ext: ".css", color: "#563d7c", icon: `<path d="M2 3h20l-2 18-8 3-8-3L2 3zm17 3H5.2l.3 3.5h13.2l-.3 3.5h-8.8l.3 3.5h8.2l-.4 4.5L12 22l-6-1.7.3-3.3h3.5l-.1 1.2 2.3.6 2.3-.6.2-2.2H5.8L5 6z"/>` },
-  sql: { label: "SQL", ext: ".sql", color: "#e38c00", icon: `<path d="M12 2C6.5 2 2 4.5 2 7.5v9C2 19.5 6.5 22 12 22s10-2.5 10-5.5v-9C22 4.5 17.5 2 12 2zm0 3c4.4 0 8 1.6 8 2.5S16.4 10 12 10 4 8.4 4 7.5 7.6 5 12 5zm8 11.5c0 .9-3.6 2.5-8 2.5s-8-1.6-8-2.5v-2.3c2.1 1.5 5 2.3 8 2.3s5.9-.8 8-2.3v2.3zm0-4.5c0 .9-3.6 2.5-8 2.5s-8-1.6-8-2.5V9.2c2.1 1.5 5 2.3 8 2.3s5.9-.8 8-2.3V12z"/>` },
-  json: { label: "JSON", ext: ".json", color: "#4ec9b0", icon: `<path d="M5 4a3 3 0 0 0-3 3v2a2 2 0 0 1-2 2 2 2 0 0 1 2 2v2a3 3 0 0 0 3 3h2v-2H5a1 1 0 0 1-1-1v-2a3 3 0 0 0-2-2.8 3 3 0 0 0 2-2.8V7a1 1 0 0 1 1-1h2V4zm14 0h-2v2h2a1 1 0 0 1 1 1v2.4a3 3 0 0 0 2 2.8 3 3 0 0 0-2 2.8V17a1 1 0 0 1-1 1h-2v2h2a3 3 0 0 0 3-3v-2a2 2 0 0 1 2-2 2 2 0 0 1-2-2V7a3 3 0 0 0-3-3z"/>` },
-  bash: { label: "Terminal", ext: ".sh", color: "#4eaa25", icon: `<path d="M4 17l6-5-6-5v10zm8 0h8v-2h-8v2z"/>` },
-  sh: { label: "Terminal", ext: ".sh", color: "#4eaa25", icon: `<path d="M4 17l6-5-6-5v10zm8 0h8v-2h-8v2z"/>` },
-  shell: { label: "Terminal", ext: ".sh", color: "#4eaa25", icon: `<path d="M4 17l6-5-6-5v10zm8 0h8v-2h-8v2z"/>` },
-  yaml: { label: "YAML", ext: ".yaml", color: "#cb171e", icon: `<path d="M2 3l7 9v9h6v-9l7-9h-5l-5 6.5L7 3z"/>` },
-  yml: { label: "YAML", ext: ".yml", color: "#cb171e", icon: `<path d="M2 3l7 9v9h6v-9l7-9h-5l-5 6.5L7 3z"/>` },
-  text: { label: "Text", ext: ".txt", color: "#8b949e", icon: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"/>` },
-};
+const COPY_BTN_SCRIPT = `(function(b){var c=decodeURIComponent(b.getAttribute('data-code'));navigator.clipboard.writeText(c).then(function(){var ci=b.querySelector('.copy-icon'),ck=b.querySelector('.check-icon');if(ci)ci.style.display='none';if(ck)ck.style.display='inline';b.setAttribute('aria-label','Copied!');setTimeout(function(){if(ci)ci.style.display='inline';if(ck)ck.style.display='none';b.setAttribute('aria-label','Copy code')},2000)})})(this)`;
 
-function getLangMeta(lang: string | undefined): LangMeta {
-  if (!lang) return LANG_META["text"];
-  return LANG_META[lang.toLowerCase()] ?? {
-    label: lang.charAt(0).toUpperCase() + lang.slice(1),
-    ext: `.${lang}`,
-    color: "#8b949e",
-    icon: `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm4 18H6V4h7v5h5z"/>`,
-  };
-}
+export function renderCodeBlock(rawText: string, rawLang?: string): string {
+  const { lang, filename, cleanText } = extractFilename(rawLang, rawText);
 
-export function renderCodeBlock(text: string, lang?: string): string {
+  // 1. Mermaid Diagrams
+  if (lang === "mermaid") {
+    return `<div class="gh-mermaid-wrapper my-6 rounded-md border border-[var(--gh-border-default)] bg-[var(--gh-canvas-default)] overflow-hidden">
+      <div class="px-4 py-2 bg-[var(--gh-canvas-subtle)] border-b border-[var(--gh-border-default)] flex items-center justify-between text-xs font-mono text-[var(--gh-fg-muted)]">
+        <span class="font-semibold text-[var(--gh-fg-default)]">Diagram (Mermaid)</span>
+      </div>
+      <div class="p-6 flex justify-center overflow-x-auto bg-[var(--gh-canvas-default)]">
+        <div class="mermaid">${escapeHtml(rawText)}</div>
+      </div>
+    </div>`;
+  }
+
+  // 2. Repository Structure / File Tree
+  if (lang === "filetree" || lang === "tree" || lang === "repo" || lang === "files") {
+    return renderFileTree(rawText);
+  }
+
+  // 3. GitHub Markdown Code Block
   const validLang = lang && hljs.getLanguage(lang) ? lang : undefined;
   const rawHighlighted = validLang
-    ? hljs.highlight(text, { language: validLang }).value
-    : hljs.highlightAuto(text).value;
+    ? hljs.highlight(cleanText, { language: validLang }).value
+    : hljs.highlightAuto(cleanText).value;
 
-  const encodedCode = encodeURIComponent(text);
-  const meta = getLangMeta(validLang || lang);
+  const encodedCode = encodeURIComponent(cleanText);
   const langClass = validLang ? `language-${validLang}` : "";
 
-  const rawLines = rawHighlighted.split("\n");
-  if (rawLines.length > 0 && rawLines[rawLines.length - 1] === "") rawLines.pop();
-  const lineCount = rawLines.length;
+  const copyButtonHtml = `<button type="button" class="gh-copy-btn" data-code="${encodedCode}" onclick="${COPY_BTN_SCRIPT}" aria-label="Copy code" title="Copy raw code">
+    <svg class="copy-icon" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"/><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"/></svg>
+    <svg class="check-icon" viewBox="0 0 16 16" width="16" height="16" fill="#3fb950" style="display:none" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>
+  </button>`;
 
-  const codeLines = rawLines
-    .map((line) => `<span class="code-line">${line || "\u200b"}</span>`)
-    .join("\n");
+  if (filename) {
+    return `<div class="gh-code-block gh-has-header my-4">
+  <div class="gh-code-header">
+    <span class="gh-code-filename">
+      <svg class="gh-file-icon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V4.707a.25.25 0 0 0-.073-.177L10.464 1.62a.25.25 0 0 0-.177-.073Zm6.25 4.5v-4.5l4.5 4.5Z"/></svg>
+      <span>${escapeHtml(filename)}</span>
+    </span>
+    ${copyButtonHtml}
+  </div>
+  <pre class="gh-pre"><code class="${langClass}">${rawHighlighted}</code></pre>
+</div>`;
+  }
 
-  return `<div class="code-block-wrapper group/code" data-lang="${validLang || "text"}" style="--lang-color: ${meta.color};">
-  <div class="code-block-header">
-    <div class="code-block-header-left">
-      <span class="code-block-dots" aria-hidden="true">
-        <span class="code-dot code-dot-red"></span>
-        <span class="code-dot code-dot-yellow"></span>
-        <span class="code-dot code-dot-green"></span>
-      </span>
-      <span class="code-block-tab">
-        <svg class="code-block-lang-icon" viewBox="0 0 24 24" width="13" height="13" fill="${meta.color}" aria-hidden="true">${meta.icon}</svg>
-        <span class="code-block-tab-label">index<span class="code-block-tab-ext">${meta.ext}</span></span>
-      </span>
-    </div>
-    <div class="code-block-header-right">
-      <span class="code-block-line-count">${lineCount} line${lineCount !== 1 ? "s" : ""}</span>
-      <button type="button" class="code-copy-btn" data-code="${encodedCode}"
-        onclick="(function(b){var c=decodeURIComponent(b.getAttribute('data-code'));navigator.clipboard.writeText(c).then(function(){var ci=b.querySelector('.copy-icon'),ck=b.querySelector('.check-icon'),lb=b.querySelector('.copy-label');if(ci)ci.style.display='none';if(ck)ck.style.display='inline';if(lb)lb.textContent='Copied!';b.classList.add('code-copy-btn--copied');setTimeout(function(){if(ci)ci.style.display='inline';if(ck)ck.style.display='none';if(lb)lb.textContent='Copy';b.classList.remove('code-copy-btn--copied')},2000)}).catch(function(){})})(this)"
-        title="Copy code" aria-label="Copy code to clipboard">
-        <svg class="copy-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        <svg class="check-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
-        <span class="copy-label">Copy</span>
-      </button>
-    </div>
-  </div>
-  <div class="code-block-body">
-    <pre class="code-pre" tabindex="0"><code class="${langClass}">${codeLines}</code></pre>
-  </div>
+  return `<div class="gh-code-block relative group/code my-4">
+  ${copyButtonHtml}
+  <pre class="gh-pre"><code class="${langClass}">${rawHighlighted}</code></pre>
 </div>`;
 }

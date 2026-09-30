@@ -7,6 +7,10 @@ import { FormatButtons } from "./format-buttons";
 import { AlertButtons } from "./alert-buttons";
 import { ModeSwitcher } from "./mode-switcher";
 import { SnippetsDropdown } from "./snippets-dropdown";
+import { TemplatePickerDialog } from "./template-picker-dialog";
+import { OutlineGeneratorDialog } from "./outline-generator-dialog";
+import { EditorFileActions } from "./editor-file-actions";
+import type { ArticleTemplate } from "@/lib/editor/templates";
 
 interface EditorToolbarProps {
   mode: "write" | "preview" | "split";
@@ -16,6 +20,12 @@ interface EditorToolbarProps {
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
   onOpenPalette?: () => void;
+  onSelectTemplate: (template: ArticleTemplate) => void;
+  onInsertOutline: (markdown: string) => void;
+  content: string;
+  onImportMarkdown?: (text: string) => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
 export function EditorToolbar({
@@ -26,13 +36,24 @@ export function EditorToolbar({
   onImageUpload,
   fileInputRef,
   onOpenPalette,
+  onSelectTemplate,
+  onInsertOutline,
+  content,
+  onImportMarkdown,
+  isFullscreen,
+  onToggleFullscreen,
 }: EditorToolbarProps) {
   return (
     <div className="flex items-center justify-between px-3 py-2 border-b border-border/80 bg-muted/30 flex-wrap gap-2">
       <div className="flex items-center gap-1.5 flex-wrap">
         <FormatButtons insertText={insertText} />
         <AlertButtons insertText={insertText} />
+
+        <div className="w-px h-5 bg-border mx-1" />
+
         <SnippetsDropdown onInsertSnippet={(s) => insertText(s)} />
+        <TemplatePickerDialog onSelectTemplate={onSelectTemplate} />
+        <OutlineGeneratorDialog onInsertOutline={onInsertOutline} />
 
         <div className="w-px h-5 bg-border mx-1" />
 
@@ -75,7 +96,16 @@ export function EditorToolbar({
         )}
       </div>
 
-      <ModeSwitcher mode={mode} setMode={setMode} />
+      <div className="flex items-center gap-2">
+        <EditorFileActions
+          content={content}
+          onImportMarkdown={onImportMarkdown}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={onToggleFullscreen}
+        />
+        <div className="w-px h-5 bg-border" />
+        <ModeSwitcher mode={mode} setMode={setMode} />
+      </div>
     </div>
   );
 }

@@ -10,6 +10,8 @@ import {
   Minus,
   Save,
   Send,
+  FolderTree,
+  Workflow,
 } from "lucide-react";
 
 export interface CommandItem {
@@ -45,11 +47,25 @@ export function getEditorCommands({
       action: () => insertText("## ", "", "Section Heading"),
     },
     {
+      id: "repo",
+      name: "Repository Structure (Tree)",
+      category: "Developer",
+      icon: <FolderTree className="w-4 h-4 text-primary" />,
+      action: () => insertText("```filetree\nproject/\n├── src/\n│   ├── components/\n│   └── lib/\n├── package.json\n└── README.md\n```\n"),
+    },
+    {
+      id: "mermaid",
+      name: "Mermaid Flowchart",
+      category: "Developer",
+      icon: <Workflow className="w-4 h-4 text-primary" />,
+      action: () => insertText("```mermaid\ngraph TD\n  Client([Browser]) --> Worker[Cloudflare Worker]\n  Worker --> D1[(D1 Database)]\n```\n"),
+    },
+    {
       id: "code",
       name: "Code Block",
       category: "Developer",
       icon: <Code className="w-4 h-4 text-primary" />,
-      action: () => insertText("\n```typescript\n", "\n```\n", "// code here"),
+      action: () => insertText("\n```typescript:src/index.ts\n", "\n```\n", "// code here"),
     },
     {
       id: "table",

@@ -32,7 +32,7 @@ export function EditorMainFields({
   onAutosave,
 }: EditorMainFieldsProps) {
   return (
-    <div className="lg:col-span-8 space-y-6">
+    <div className="xl:col-span-9 lg:col-span-8 space-y-6">
       <div className="space-y-1.5">
         <label className="text-xs font-semibold text-muted-foreground uppercase font-mono" htmlFor="title">
           Article Title *

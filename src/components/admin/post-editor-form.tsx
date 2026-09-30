@@ -92,7 +92,7 @@ export function PostEditorForm({ initialPost, categories, tags }: PostEditorForm
         }}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 lg:grid-cols-12 gap-6 lg:gap-8">
         <EditorMainFields
           title={title}
           onTitleChange={handleTitleChange}

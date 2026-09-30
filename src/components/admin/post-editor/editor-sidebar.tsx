@@ -57,7 +57,7 @@ export function EditorSidebar({
   setCanonicalUrl,
 }: EditorSidebarProps) {
   return (
-    <aside className="lg:col-span-4 space-y-6">
+    <aside className="xl:col-span-3 lg:col-span-4 space-y-6">
       <EditorSidebarPublish
         status={status}
         setStatus={setStatus}

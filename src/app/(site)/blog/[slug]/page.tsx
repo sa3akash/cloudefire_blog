@@ -2,19 +2,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Suspense } from "react";
-import {
-  getPostBySlug,
-  getAdjacentPosts,
-  recordPostViewFromHeaders,
-} from "@/lib/services/posts";
+import { getPostBySlug, getAdjacentPosts, recordPostViewFromHeaders } from "@/lib/services/posts";
 import { getSetting } from "@/lib/services/settings";
 import { renderMarkdown, extractHeadings } from "@/lib/markdown";
-import {
-  buildArticleMetadata,
-  generateArticleJsonLd,
-  generateBreadcrumbJsonLd,
-  getBaseUrl,
-} from "@/lib/seo";
+import { buildArticleMetadata, generateArticleJsonLd, generateBreadcrumbJsonLd, getBaseUrl } from "@/lib/seo";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { LikeButton } from "@/components/blog/like-button";
@@ -22,11 +13,10 @@ import { ArticleHeader } from "@/components/blog/article-header";
 import { ArticleNavigation } from "@/components/blog/article-navigation";
 import { ArticleTags } from "@/components/blog/article-tags";
 import { ReadingProgress } from "@/components/blog/reading-progress";
+import { MermaidRunner } from "@/components/blog/mermaid-runner";
 import {
-  RelatedPostsSection,
-  RelatedPostsSkeleton,
-  CommentsSectionLoader,
-  CommentsSectionSkeleton,
+  RelatedPostsSection, RelatedPostsSkeleton,
+  CommentsSectionLoader, CommentsSectionSkeleton,
 } from "@/components/blog/article-streamed-sections";
 
 interface ArticlePageProps {
@@ -113,6 +103,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         <div className={`${isMultiCol ? "lg:col-span-8" : "w-full"} space-y-10 min-w-0`}>
           {isMultiCol && <div className="lg:hidden"><TableOfContents headings={headings} /></div>}
           <div className="prose-article" dangerouslySetInnerHTML={{ __html: renderedContent }} />
+          <MermaidRunner contentKey={post.content} />
           <ArticleTags tags={post.tags} />
           <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-border/80">
             <LikeButton postId={post.id} />

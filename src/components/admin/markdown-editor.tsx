@@ -2,12 +2,15 @@
 
 import { useState, useRef, useEffect } from "react";
 import { calculateReadingTime } from "@/lib/markdown";
-import { uploadMediaAction } from "@/app/actions/admin";
+import { cn } from "@/lib/utils";
+import type { ArticleTemplate } from "@/lib/editor/templates";
 import { EditorToolbar } from "./markdown-editor/editor-toolbar";
 import { EditorPane } from "./markdown-editor/editor-pane";
 import { EditorFooter } from "./markdown-editor/editor-footer";
 import { useEditorAutosave } from "./markdown-editor/use-editor-autosave";
 import { useEditorShortcuts } from "./markdown-editor/use-editor-shortcuts";
+import { useEditorImageUpload } from "./markdown-editor/use-editor-image-upload";
+import { useEditorInsert } from "./markdown-editor/use-editor-insert";
 import { CommandPalette } from "./markdown-editor/command-palette";
 
 interface MarkdownEditorProps {
@@ -32,36 +35,16 @@ export function MarkdownEditor({
   }
 
   const [mode, setMode] = useState<"write" | "preview" | "split">("split");
-  const [uploadingImage, setUploadingImage] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { renderedPreview, isSaved, setIsSaved } = useEditorAutosave(content, onAutosave);
-
-  const charCount = content.length;
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const readingTime = calculateReadingTime(content);
-
-  const insertText = (before: string, after: string = "", placeholder: string = "") => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const currentVal = textarea.value;
-    const selected = currentVal.substring(start, end) || placeholder;
-
-    const newVal = currentVal.substring(0, start) + before + selected + after + currentVal.substring(end);
-    setContent(newVal);
-    setIsSaved(false);
-    onChange(newVal);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + before.length, start + before.length + selected.length);
-    }, 0);
-  };
+  const insertText = useEditorInsert(textareaRef, content, setContent, setIsSaved, onChange);
+  const {
+    uploadingImage, isDragging, setIsDragging,
+    fileInputRef, handleImageUpload, handlePaste, handleDrop,
+  } = useEditorImageUpload(insertText);
 
   useEditorShortcuts({
     onSave: () => onAutosave?.(content),
@@ -71,44 +54,42 @@ export function MarkdownEditor({
   });
 
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (!isSaved && content.length > 50) e.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) setIsFullscreen(false);
     };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isSaved, content]);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setContent(val);
+  const handleSelectTemplate = (tmpl: ArticleTemplate) => {
+    if (!content.trim()) {
+      setContent(tmpl.content);
+      onChange(tmpl.content);
+      setIsSaved(false);
+      return;
+    }
+    const replace = window.confirm(
+      `Replace current content with "${tmpl.name}" template?\n\nClick OK to replace, or Cancel to append to bottom.`
+    );
+    const updated = replace ? tmpl.content : `${content}\n\n---\n\n${tmpl.content}`;
+    setContent(updated);
+    onChange(updated);
     setIsSaved(false);
-    onChange(val);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingImage(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("altText", file.name.replace(/\.[^/.]+$/, ""));
-
-    const result = await uploadMediaAction(formData);
-    setUploadingImage(false);
-
-    if (result.success && result.data) {
-      const data = result.data as { url: string; fileName: string };
-      insertText(`\n![${data.fileName}](${data.url})\n`);
-    } else {
-      alert(result.message || "Failed to upload image to R2");
-    }
-
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleImportMarkdown = (imported: string) => {
+    setContent(imported);
+    onChange(imported);
+    setIsSaved(false);
   };
 
   return (
-    <div className="flex flex-col rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs">
+    <div
+      className={cn(
+        "flex flex-col rounded-xl border border-border/80 bg-card overflow-hidden shadow-xs transition-all",
+        isFullscreen && "fixed inset-0 z-50 rounded-none border-0 h-screen w-screen"
+      )}
+    >
       <EditorToolbar
         mode={mode}
         setMode={setMode}
@@ -117,6 +98,12 @@ export function MarkdownEditor({
         onImageUpload={handleImageUpload}
         fileInputRef={fileInputRef}
         onOpenPalette={() => setPaletteOpen(true)}
+        onSelectTemplate={handleSelectTemplate}
+        onInsertOutline={(md) => insertText(md)}
+        content={content}
+        onImportMarkdown={handleImportMarkdown}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
       />
 
       <EditorPane
@@ -124,13 +111,22 @@ export function MarkdownEditor({
         content={content}
         renderedPreview={renderedPreview}
         textareaRef={textareaRef}
-        onChange={handleChange}
+        onChange={(e) => {
+          setContent(e.target.value);
+          setIsSaved(false);
+          onChange(e.target.value);
+        }}
+        isFullscreen={isFullscreen}
+        onPaste={handlePaste}
+        onDrop={handleDrop}
+        isDragging={isDragging}
+        setIsDragging={setIsDragging}
       />
 
       <EditorFooter
-        charCount={charCount}
-        wordCount={wordCount}
-        readingTime={readingTime}
+        charCount={content.length}
+        wordCount={content.trim() ? content.trim().split(/\s+/).length : 0}
+        readingTime={calculateReadingTime(content)}
         isSaved={isSaved}
       />
 
