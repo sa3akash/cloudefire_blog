@@ -33,6 +33,17 @@ export function buildArticleMetadata(data: ArticleSeoData): Metadata {
     alternates: {
       canonical,
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title: data.title,
       description,
@@ -59,39 +70,4 @@ export function buildArticleMetadata(data: ArticleSeoData): Metadata {
       images: [image],
     },
   };
-}
-
-export function generateArticleJsonLd(data: ArticleSeoData): string {
-  const baseUrl = getBaseUrl();
-  const url = `${baseUrl}/blog/${data.slug}`;
-  const image = data.coverImage || `${baseUrl}/og-default.png`;
-
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: data.title,
-    description: data.description || "",
-    image: [image],
-    datePublished: data.publishedAt ? data.publishedAt.toISOString() : undefined,
-    dateModified: (data.updatedAt || data.publishedAt || new Date()).toISOString(),
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": url,
-    },
-    author: {
-      "@type": "Person",
-      name: data.authorName,
-      url: data.authorUrl ? `${baseUrl}/author/${data.authorUrl}` : undefined,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "CloudBlog",
-      logo: {
-        "@type": "ImageObject",
-        url: `${baseUrl}/icon.png`,
-      },
-    },
-  };
-
-  return JSON.stringify(schema, null, 2);
 }

@@ -71,6 +71,7 @@ export type TagInput = z.infer<typeof tagSchema>;
 
 export const commentSchema = z.object({
   postId: z.string().min(1, "Post ID is required"),
+  parentId: z.string().optional().nullable(),
   authorName: z.string().min(1, "Your name is required").max(80),
   authorEmail: z.string().email("A valid email address is required"),
   content: z

@@ -1,67 +1,62 @@
 "use client";
 
 import * as React from "react";
-import { Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
+import { Sun, Moon, Laptop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-function getThemeSnapshot(): "light" | "dark" {
-  if (typeof window === "undefined") return "light";
-  const stored = localStorage.getItem("cloudblog_theme") as "light" | "dark" | null;
-  if (stored) return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-function subscribeTheme(callback: () => void) {
-  window.addEventListener("storage", callback);
-  const mql = window.matchMedia("(prefers-color-scheme: dark)");
-  mql.addEventListener("change", callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    mql.removeEventListener("change", callback);
-  };
-}
-
 export function ThemeToggle() {
-  const isServer = React.useSyncExternalStore(
-    () => () => {},
-    () => false,
-    () => true
-  );
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
-  const theme = React.useSyncExternalStore(
-    subscribeTheme,
-    getThemeSnapshot,
-    () => "light" as const
-  );
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const toggleTheme = () => {
-    const next = theme === "light" ? "dark" : "light";
-    localStorage.setItem("cloudblog_theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-    window.dispatchEvent(new Event("storage"));
-  };
-
-  if (isServer) {
+  if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9 opacity-50" aria-label="Toggle theme">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 opacity-50"
+        aria-label="Toggle theme"
+      >
         <Sun className="h-4 w-4" />
       </Button>
     );
   }
+
+  const toggleTheme = () => {
+    if (theme === "light") {
+      setTheme("dark");
+    } else if (theme === "dark") {
+      setTheme("system");
+    } else {
+      setTheme("light");
+    }
+  };
+
+  const currentTheme = theme || "system";
+  const icon =
+    currentTheme === "system" ? (
+      <Laptop className="h-4 w-4 text-muted-foreground" />
+    ) : resolvedTheme === "dark" ? (
+      <Moon className="h-4 w-4 text-blue-400" />
+    ) : (
+      <Sun className="h-4 w-4 text-amber-500" />
+    );
 
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="h-9 w-9 transition-colors"
-      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      className="h-9 w-9 transition-colors rounded-lg hover:bg-muted/80"
+      title={`Current: ${currentTheme}. Click to switch theme`}
+      aria-label={`Current: ${currentTheme}. Click to switch theme`}
     >
-      {theme === "light" ? (
-        <Moon className="h-4 w-4" />
-      ) : (
-        <Sun className="h-4 w-4" />
-      )}
+      {icon}
+      <span className="sr-only">Toggle theme</span>
     </Button>
   );
 }

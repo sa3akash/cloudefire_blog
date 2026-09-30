@@ -5,9 +5,13 @@ import { generateRssFeed } from "@/lib/seo";
 
 export const revalidate = 3600; // Cache feed for 1 hour
 
-export async function GET() {
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const limitParam = url.searchParams.get("limit");
+  const limit = Math.min(100, Math.max(10, limitParam ? parseInt(limitParam, 10) : 30));
+
   const [postsData, settings] = await Promise.all([
-    getPublishedPosts({ page: 1, limit: 30 }),
+    getPublishedPosts({ page: 1, limit }),
     getAllSettings(),
   ]);
 

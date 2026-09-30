@@ -7,34 +7,10 @@ import { EditorSidebarTaxonomy } from "./post-editor/editor-sidebar-taxonomy";
 import { EditorSidebarMedia } from "./post-editor/editor-sidebar-media";
 import { EditorSidebarSeo } from "./post-editor/editor-sidebar-seo";
 import { usePostEditor } from "./post-editor/use-post-editor";
-
-interface CategoryOption {
-  id: string;
-  name: string;
-}
-
-interface TagOption {
-  id: string;
-  name: string;
-}
+import type { InitialPostData, CategoryOption, TagOption } from "./post-editor/types";
 
 interface PostEditorFormProps {
-  initialPost?: {
-    id: string;
-    title: string;
-    slug: string;
-    excerpt: string | null;
-    content: string;
-    coverImage: string | null;
-    categoryId: string | null;
-    status: "draft" | "published" | "scheduled";
-    featured: boolean;
-    seoTitle: string | null;
-    seoDescription: string | null;
-    canonicalUrl: string | null;
-    publishedAt: Date | null;
-    tagIds: string[];
-  };
+  initialPost?: InitialPostData;
   categories: CategoryOption[];
   tags: TagOption[];
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Provider from "@/providers";
+import { generateWebSiteJsonLd } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,12 +41,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const websiteJsonLd = generateWebSiteJsonLd(
+    "CloudBlog",
+    "A high-performance editorial publication platform engineered to run entirely on Cloudflare Workers, D1 database, and R2 media storage."
+  );
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: websiteJsonLd }}
+        />
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         <Provider>{children}</Provider>
       </body>

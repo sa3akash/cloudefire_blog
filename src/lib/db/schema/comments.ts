@@ -8,6 +8,7 @@ export const comments = sqliteTable(
     postId: text("post_id")
       .notNull()
       .references(() => posts.id, { onDelete: "cascade" }),
+    parentId: text("parent_id"),
     authorName: text("author_name").notNull(),
     authorEmail: text("author_email").notNull(),
     content: text("content").notNull(),
@@ -21,6 +22,7 @@ export const comments = sqliteTable(
   },
   (table) => [
     index("comments_post_id_idx").on(table.postId),
+    index("comments_parent_id_idx").on(table.parentId),
     index("comments_status_idx").on(table.status),
   ]
 );

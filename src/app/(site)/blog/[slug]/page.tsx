@@ -10,7 +10,12 @@ import {
 import { getApprovedCommentsForPost } from "@/lib/services/comments";
 import { getSetting } from "@/lib/services/settings";
 import { renderMarkdown, extractHeadings } from "@/lib/markdown";
-import { buildArticleMetadata, generateArticleJsonLd, getBaseUrl } from "@/lib/seo";
+import {
+  buildArticleMetadata,
+  generateArticleJsonLd,
+  generateBreadcrumbJsonLd,
+  getBaseUrl,
+} from "@/lib/seo";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { ShareButtons } from "@/components/blog/share-buttons";
 import { CommentsSection } from "@/components/blog/comments-section";
@@ -20,9 +25,7 @@ import { ArticleTags } from "@/components/blog/article-tags";
 import { RelatedPosts } from "@/components/blog/related-posts";
 
 interface ArticlePageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
@@ -78,16 +81,22 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     updatedAt: post.updatedAt,
     authorName: post.author.name,
     authorUrl: post.author.slug,
+    categoryName: post.category?.name,
   });
+
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Blog", url: "/blog" },
+    ...(post.category ? [{ name: post.category.name, url: `/category/${post.category.slug}` }] : []),
+    { name: post.title, url: `/blog/${post.slug}` },
+  ]);
 
   const fullUrl = `${getBaseUrl()}/blog/${post.slug}`;
 
   return (
     <article className="container mx-auto max-w-5xl px-4 sm:px-6 py-10 sm:py-16 space-y-12">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLd }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
 
       <ArticleHeader
         title={post.title}
@@ -108,19 +117,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         </aside>
 
         <div className="lg:col-span-9 space-y-10 min-w-0">
-          <div
-            className="prose-article"
-            dangerouslySetInnerHTML={{ __html: renderedContent }}
-          />
-
+          <div className="prose-article" dangerouslySetInnerHTML={{ __html: renderedContent }} />
           <ArticleTags tags={post.tags} />
-
           <div className="lg:hidden py-4 border-t border-b border-border/80">
             <ShareButtons title={post.title} url={fullUrl} />
           </div>
-
           <ArticleNavigation author={post.author} adjacent={adjacent} />
-
           {allowCommentsSetting === "true" && (
             <CommentsSection postId={post.id} initialComments={comments} />
           )}

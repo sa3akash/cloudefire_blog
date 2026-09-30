@@ -4,6 +4,7 @@ import { RefObject } from "react";
 import { Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormatButtons } from "./format-buttons";
+import { AlertButtons } from "./alert-buttons";
 import { ModeSwitcher } from "./mode-switcher";
 
 interface EditorToolbarProps {
@@ -27,6 +28,7 @@ export function EditorToolbar({
     <div className="flex items-center justify-between px-3 py-2 border-b border-border/80 bg-muted/30 flex-wrap gap-2">
       <div className="flex items-center gap-1 flex-wrap">
         <FormatButtons insertText={insertText} />
+        <AlertButtons insertText={insertText} />
 
         <div className="w-px h-5 bg-border mx-1" />
 

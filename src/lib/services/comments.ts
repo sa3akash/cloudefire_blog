@@ -1,12 +1,14 @@
 import { getDb, comments, posts } from "@/lib/db";
-import { eq, desc, and, count } from "drizzle-orm";
+import { eq, desc, asc, and, count } from "drizzle-orm";
 import { getSetting } from "./settings";
 
 export interface PublicComment {
   id: string;
+  parentId?: string | null;
   authorName: string;
   content: string;
   createdAt: Date;
+  replies?: PublicComment[];
 }
 
 export async function getApprovedCommentsForPost(postId: string): Promise<PublicComment[]> {
@@ -15,19 +17,38 @@ export async function getApprovedCommentsForPost(postId: string): Promise<Public
   const rows = await db
     .select({
       id: comments.id,
+      parentId: comments.parentId,
       authorName: comments.authorName,
       content: comments.content,
       createdAt: comments.createdAt,
     })
     .from(comments)
     .where(and(eq(comments.postId, postId), eq(comments.status, "approved")))
-    .orderBy(desc(comments.createdAt));
+    .orderBy(asc(comments.createdAt));
 
-  return rows;
+  // Build threaded tree
+  const commentMap = new Map<string, PublicComment>();
+  const rootComments: PublicComment[] = [];
+
+  for (const row of rows) {
+    commentMap.set(row.id, { ...row, replies: [] });
+  }
+
+  for (const row of rows) {
+    const item = commentMap.get(row.id)!;
+    if (row.parentId && commentMap.has(row.parentId)) {
+      commentMap.get(row.parentId)!.replies!.push(item);
+    } else {
+      rootComments.push(item);
+    }
+  }
+
+  return rootComments.reverse();
 }
 
 export async function submitComment(data: {
   postId: string;
+  parentId?: string | null;
   authorName: string;
   authorEmail: string;
   content: string;
@@ -37,7 +58,6 @@ export async function submitComment(data: {
   const id = crypto.randomUUID();
   const now = new Date();
 
-  // Check if auto-approve comments is enabled in site settings
   const autoApproveSetting = await getSetting("autoApproveComments", "false");
   const initialStatus: "pending" | "approved" =
     autoApproveSetting === "true" ? "approved" : "pending";
@@ -45,6 +65,7 @@ export async function submitComment(data: {
   await db.insert(comments).values({
     id,
     postId: data.postId,
+    parentId: data.parentId || null,
     authorName: data.authorName.trim(),
     authorEmail: data.authorEmail.trim().toLowerCase(),
     content: data.content.trim(),
@@ -73,13 +94,13 @@ export async function getAllCommentsForAdmin(options: {
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
-
   const totalRes = await db.select({ count: count() }).from(comments).where(whereClause);
   const total = totalRes[0]?.count || 0;
 
   const rows = await db
     .select({
       id: comments.id,
+      parentId: comments.parentId,
       postId: comments.postId,
       postTitle: posts.title,
       postSlug: posts.slug,
@@ -106,10 +127,7 @@ export async function updateCommentStatus(
   const db = getDb();
   await db
     .update(comments)
-    .set({
-      status,
-      updatedAt: new Date(),
-    })
+    .set({ status, updatedAt: new Date() })
     .where(eq(comments.id, id));
 }
 

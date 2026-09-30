@@ -2,54 +2,67 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
 import { savePostAction, uploadMediaAction } from "@/app/actions/admin";
 import { generateSlug } from "@/lib/validation";
-
-interface InitialPostData {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  content: string;
-  coverImage: string | null;
-  categoryId: string | null;
-  status: "draft" | "published" | "scheduled";
-  featured: boolean;
-  seoTitle: string | null;
-  seoDescription: string | null;
-  canonicalUrl: string | null;
-  publishedAt: Date | null;
-  tagIds: string[];
-}
+import type { PostFormData, InitialPostData } from "./types";
 
 export function usePostEditor(initialPost?: InitialPostData, defaultCategoryId?: string | null) {
   const router = useRouter();
-
   const [postId, setPostId] = useState<string | null>(initialPost?.id || null);
-  const [title, setTitle] = useState(initialPost?.title || "");
-  const [slug, setSlug] = useState(initialPost?.slug || "");
   const [manualSlug, setManualSlug] = useState(Boolean(initialPost?.slug));
-  const [excerpt, setExcerpt] = useState(initialPost?.excerpt || "");
-  const [content, setContent] = useState(initialPost?.content || "");
-  const [coverImage, setCoverImage] = useState(initialPost?.coverImage || "");
-  const [categoryId, setCategoryId] = useState<string | null>(
-    initialPost?.categoryId || defaultCategoryId || null
-  );
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>(initialPost?.tagIds || []);
-  const [status, setStatus] = useState<"draft" | "published" | "scheduled">(
-    initialPost?.status || "draft"
-  );
-  const [featured, setFeatured] = useState<boolean>(initialPost?.featured || false);
-  const [seoTitle, setSeoTitle] = useState(initialPost?.seoTitle || "");
-  const [seoDescription, setSeoDescription] = useState(initialPost?.seoDescription || "");
-  const [canonicalUrl, setCanonicalUrl] = useState(initialPost?.canonicalUrl || "");
   const [saving, setSaving] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
+  const { setValue, getValues, watch } = useForm<PostFormData>({
+    defaultValues: {
+      title: initialPost?.title || "",
+      slug: initialPost?.slug || "",
+      excerpt: initialPost?.excerpt || "",
+      content: initialPost?.content || "",
+      coverImage: initialPost?.coverImage || "",
+      categoryId: initialPost?.categoryId || defaultCategoryId || null,
+      tagIds: initialPost?.tagIds || [],
+      status: initialPost?.status || "draft",
+      featured: initialPost?.featured || false,
+      seoTitle: initialPost?.seoTitle || "",
+      seoDescription: initialPost?.seoDescription || "",
+      canonicalUrl: initialPost?.canonicalUrl || "",
+    },
+  });
+
+  const [
+    title,
+    slug,
+    excerpt,
+    content,
+    coverImage,
+    categoryId,
+    selectedTagIds,
+    status,
+    featured,
+    seoTitle,
+    seoDescription,
+    canonicalUrl,
+  ] = watch([
+    "title",
+    "slug",
+    "excerpt",
+    "content",
+    "coverImage",
+    "categoryId",
+    "tagIds",
+    "status",
+    "featured",
+    "seoTitle",
+    "seoDescription",
+    "canonicalUrl",
+  ]);
+
   const handleTitleChange = (val: string) => {
-    setTitle(val);
-    if (!manualSlug) setSlug(generateSlug(val));
+    setValue("title", val, { shouldDirty: true });
+    if (!manualSlug) setValue("slug", generateSlug(val), { shouldDirty: true });
   };
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,41 +72,36 @@ export function usePostEditor(initialPost?: InitialPostData, defaultCategoryId?:
     setUploadingCover(true);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("altText", `${title} cover image`);
+    formData.append("altText", `${getValues("title")} cover image`);
 
     const result = await uploadMediaAction(formData);
     setUploadingCover(false);
 
     if (result.success && result.data) {
-      setCoverImage((result.data as { url: string }).url);
+      setValue("coverImage", (result.data as { url: string }).url, { shouldDirty: true });
     } else {
       alert(result.message || "Failed to upload cover image to R2");
     }
   };
 
   const toggleTag = (tagId: string) => {
-    setSelectedTagIds((prev) =>
-      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]
-    );
+    const current = getValues("tagIds") || [];
+    const next = current.includes(tagId) ? current.filter((id) => id !== tagId) : [...current, tagId];
+    setValue("tagIds", next, { shouldDirty: true });
   };
 
   const handleSave = async (targetStatus?: "draft" | "published") => {
     setSaving(true);
     setFeedback(null);
 
+    const values = getValues();
+    const finalStatus = targetStatus || values.status;
+    const finalSlug = values.slug || generateSlug(values.title);
+
     const result = await savePostAction(postId, {
-      title,
-      slug: slug || generateSlug(title),
-      excerpt,
-      content,
-      coverImage,
-      categoryId,
-      tagIds: selectedTagIds,
-      status: targetStatus || status,
-      featured,
-      seoTitle,
-      seoDescription,
-      canonicalUrl,
+      ...values,
+      slug: finalSlug,
+      status: finalStatus,
     });
 
     setSaving(false);
@@ -112,31 +120,30 @@ export function usePostEditor(initialPost?: InitialPostData, defaultCategoryId?:
   return {
     postId,
     title,
-    setTitle,
     slug,
-    setSlug,
+    setSlug: (val: string) => setValue("slug", val, { shouldDirty: true }),
     manualSlug,
     setManualSlug,
     excerpt,
-    setExcerpt,
+    setExcerpt: (val: string) => setValue("excerpt", val, { shouldDirty: true }),
     content,
-    setContent,
+    setContent: (val: string) => setValue("content", val, { shouldDirty: true }),
     coverImage,
-    setCoverImage,
+    setCoverImage: (val: string) => setValue("coverImage", val, { shouldDirty: true }),
     categoryId,
-    setCategoryId,
+    setCategoryId: (val: string | null) => setValue("categoryId", val, { shouldDirty: true }),
     selectedTagIds,
     toggleTag,
     status,
-    setStatus,
+    setStatus: (val: "draft" | "published" | "scheduled") => setValue("status", val, { shouldDirty: true }),
     featured,
-    setFeatured,
+    setFeatured: (val: boolean) => setValue("featured", val, { shouldDirty: true }),
     seoTitle,
-    setSeoTitle,
+    setSeoTitle: (val: string) => setValue("seoTitle", val, { shouldDirty: true }),
     seoDescription,
-    setSeoDescription,
+    setSeoDescription: (val: string) => setValue("seoDescription", val, { shouldDirty: true }),
     canonicalUrl,
-    setCanonicalUrl,
+    setCanonicalUrl: (val: string) => setValue("canonicalUrl", val, { shouldDirty: true }),
     saving,
     uploadingCover,
     feedback,
