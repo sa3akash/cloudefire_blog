@@ -5,7 +5,7 @@ import { resolve } from "path";
 const wranglerPath = resolve(process.cwd(), "wrangler.jsonc");
 let configRaw = readFileSync(wranglerPath, "utf-8");
 
-console.log("==> Configuring Cloudflare Resources (D1, KV, R2 & Domain)...");
+console.log("==> Configuring Cloudflare Resources (D1, R2 & Domain)...");
 
 function runCommand(cmd: string): string {
   try {
@@ -51,24 +51,18 @@ if (targetDbId && !targetDbId.includes("00000000")) {
   console.log(`==> Configured D1 Database UUID: ${targetDbId}`);
 }
 
-// 2. Resolve KV Namespace ID
-let targetKvId = process.env.CLOUDFLARE_KV_ID?.trim();
-if (!targetKvId || targetKvId.includes("00000000")) {
-  const kvListOut = runCommand("bun x wrangler kv namespace list --json");
-  try {
-    const kvs = JSON.parse(kvListOut) as Array<{ title: string; id: string }>;
-    const existingKv = kvs.find((k) => k.title === "cloudblog-CLOUDBLOG_KV" || k.title === "CLOUDBLOG_KV");
-    if (existingKv?.id) targetKvId = existingKv.id;
-  } catch {}
-  if (!targetKvId) {
-    const kvCreateOut = runCommand("bun x wrangler kv namespace create CLOUDBLOG_KV");
-    const kvIdMatch = kvCreateOut.match(/id\s*=\s*["']?([a-f0-9]+)["']?/i) || kvCreateOut.match(/([a-f0-9]{32})/i);
-    if (kvIdMatch) targetKvId = kvIdMatch[1];
-  }
-}
+// 2. Resolve KV Namespace ID (Optional - only if provided)
+const targetKvId = process.env.CLOUDFLARE_KV_ID?.trim();
 if (targetKvId && !targetKvId.includes("00000000")) {
-  configRaw = configRaw.replace(/"id":\s*"00000000000000000000000000000000"/, `"id": "${targetKvId}"`);
-  console.log(`==> Configured KV Namespace ID: ${targetKvId}`);
+  if (!configRaw.includes('"kv_namespaces"')) {
+    const kvSnippet = `"kv_namespaces": [\n    {\n      "binding": "KV",\n      "id": "${targetKvId}"\n    }\n  ],`;
+    configRaw = configRaw.replace(/"vars":/, `${kvSnippet}\n  "vars":`);
+    console.log(`==> Attached optional KV Namespace: ${targetKvId}`);
+  }
+} else {
+  // Strip any dummy KV namespace if present
+  configRaw = configRaw.replace(/,\s*"kv_namespaces":\s*\[[^\]]+\]/g, "");
+  configRaw = configRaw.replace(/"kv_namespaces":\s*\[[^\]]+\]\s*,?/g, "");
 }
 
 // 3. Ensure R2 Bucket Exists
@@ -102,16 +96,8 @@ if (domain) {
 } else if (accountId) {
   const subRes = await cfApi(`/accounts/${accountId}/workers/subdomain`);
   const subData = subRes?.result as { subdomain?: string } | undefined;
-  if (!subRes?.success || !subData?.subdomain) {
-    const candidate = `cloudblog-${accountId.slice(0, 6).toLowerCase()}`;
-    const regRes = await cfApi(`/accounts/${accountId}/workers/subdomain`, "PUT", { subdomain: candidate });
-    const regData = regRes?.result as { subdomain?: string } | undefined;
-    if (regRes?.success && regData?.subdomain) {
-      console.log(`==> Registered workers.dev subdomain: ${regData.subdomain}.workers.dev`);
-    } else {
-      console.log("ℹ️ No workers.dev subdomain found on your Cloudflare account.");
-      console.log(`👉 Add 'CLOUDFLARE_CUSTOM_DOMAIN' secret to GitHub OR visit: https://dash.cloudflare.com/${accountId}/workers/onboarding`);
-    }
+  if (subRes?.success && subData?.subdomain) {
+    console.log(`==> Deploying to workers.dev subdomain: ${subData.subdomain}.workers.dev`);
   }
 }
 

@@ -23,12 +23,6 @@
       "bucket_name": "cloudblog-media"
     }
   ],
-  "kv_namespaces": [
-    {
-      "binding": "KV",
-      "id": "00000000000000000000000000000000"
-    }
-  ],
   "vars": {
     "SITE_URL": "http://localhost:3000",
     "SITE_NAME": "CloudBlog"
