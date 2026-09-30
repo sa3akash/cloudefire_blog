@@ -15,6 +15,7 @@ import {
   restorePostVersionAction,
 } from "@/app/actions/admin";
 import type { VersionSummary } from "@/lib/services/post-versions";
+import { VersionListItem } from "./version-list-item";
 import { getPostVersionDetailAction } from "@/app/actions/admin/versions";
 
 interface VersionHistoryDialogProps {
@@ -39,9 +40,7 @@ export function VersionHistoryDialog({ postId, onRestored }: VersionHistoryDialo
     setLoading(true);
     const res = await getPostVersionsAction(postId);
     setLoading(false);
-    if (res.success && res.data) {
-      setVersions(res.data as VersionSummary[]);
-    }
+    if (res.success && res.data) setVersions(res.data as VersionSummary[]);
   };
 
   const selectVersion = async (id: string) => {
@@ -52,7 +51,7 @@ export function VersionHistoryDialog({ postId, onRestored }: VersionHistoryDialo
   };
 
   const handleRestore = async (versionId: string) => {
-    if (!confirm("Are you sure you want to restore this version? Your current state will be preserved as a new version.")) return;
+    if (!confirm("Restore this version? Your current state will be preserved as a new version.")) return;
     setRestoring(true);
     const res = await restorePostVersionAction(versionId);
     setRestoring(false);
@@ -98,23 +97,12 @@ export function VersionHistoryDialog({ postId, onRestored }: VersionHistoryDialo
               <div className="p-8 text-center text-xs text-muted-foreground">No past revisions recorded yet.</div>
             ) : (
               versions.map((ver) => (
-                <div
+                <VersionListItem
                   key={ver.id}
-                  onClick={() => selectVersion(ver.id)}
-                  className={`p-3 rounded-lg border text-xs cursor-pointer transition-all ${
-                    selectedVersion?.id === ver.id
-                      ? "border-primary bg-primary/5"
-                      : "border-border/70 hover:bg-muted/50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between font-semibold">
-                    <span>Version {ver.versionNumber}</span>
-                    <span className="text-[10px] text-muted-foreground font-mono">
-                      {new Date(ver.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground truncate mt-1">{ver.title}</p>
-                </div>
+                  version={ver}
+                  isSelected={selectedVersion?.id === ver.id}
+                  onSelect={selectVersion}
+                />
               ))
             )}
           </div>

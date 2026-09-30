@@ -4,11 +4,7 @@ import { useState, useEffect } from "react";
 import { EditorHeader } from "./post-editor/editor-header";
 import { EditorActionBar } from "./post-editor/editor-action-bar";
 import { EditorMainFields } from "./post-editor/editor-main-fields";
-import { EditorSidebarPublish } from "./post-editor/editor-sidebar-publish";
-import { EditorSidebarTaxonomy } from "./post-editor/editor-sidebar-taxonomy";
-import { EditorSidebarMedia } from "./post-editor/editor-sidebar-media";
-import { EditorSidebarSeo } from "./post-editor/editor-sidebar-seo";
-import { SeoAssistant } from "./post-editor/seo-assistant";
+import { EditorSidebar } from "./post-editor/editor-sidebar";
 import { usePostEditor } from "./post-editor/use-post-editor";
 import { renderMarkdown } from "@/lib/markdown";
 import type { InitialPostData, CategoryOption, TagOption } from "./post-editor/types";
@@ -111,44 +107,30 @@ export function PostEditorForm({ initialPost, categories, tags }: PostEditorForm
           onAutosave={() => handleSave()}
         />
 
-        <aside className="lg:col-span-4 space-y-6">
-          <EditorSidebarPublish
-            status={status}
-            setStatus={setStatus}
-            featured={featured}
-            setFeatured={setFeatured}
-          />
-          <SeoAssistant
-            title={title}
-            seoDescription={seoDescription}
-            content={content}
-            hasCoverImage={Boolean(coverImage)}
-            hasCategory={Boolean(categoryId)}
-          />
-          <EditorSidebarTaxonomy
-            categories={categories}
-            categoryId={categoryId}
-            setCategoryId={setCategoryId}
-            tags={tags}
-            selectedTagIds={selectedTagIds}
-            toggleTag={toggleTag}
-          />
-          <EditorSidebarMedia
-            coverImage={coverImage}
-            setCoverImage={setCoverImage}
-            uploadingCover={uploadingCover}
-            onCoverUpload={handleCoverUpload}
-          />
-          <EditorSidebarSeo
-            title={title}
-            seoTitle={seoTitle}
-            setSeoTitle={setSeoTitle}
-            seoDescription={seoDescription}
-            setSeoDescription={setSeoDescription}
-            canonicalUrl={canonicalUrl}
-            setCanonicalUrl={setCanonicalUrl}
-          />
-        </aside>
+        <EditorSidebar
+          status={status}
+          setStatus={setStatus}
+          featured={featured}
+          setFeatured={setFeatured}
+          title={title}
+          seoDescription={seoDescription}
+          content={content}
+          coverImage={coverImage}
+          categoryId={categoryId}
+          categories={categories}
+          setCategoryId={setCategoryId}
+          tags={tags}
+          selectedTagIds={selectedTagIds}
+          toggleTag={toggleTag}
+          uploadingCover={uploadingCover}
+          onCoverUpload={handleCoverUpload}
+          setCoverImage={setCoverImage}
+          seoTitle={seoTitle}
+          setSeoTitle={setSeoTitle}
+          setSeoDescription={setSeoDescription}
+          canonicalUrl={canonicalUrl}
+          setCanonicalUrl={setCanonicalUrl}
+        />
       </div>
     </div>
   );
