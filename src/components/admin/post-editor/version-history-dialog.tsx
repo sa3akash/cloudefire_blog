@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/dialog";
 import {
   getPostVersionsAction,
+  getPostVersionDetailAction,
   restorePostVersionAction,
 } from "@/app/actions/admin";
 import type { VersionSummary } from "@/lib/services/post-versions";
 import { VersionListItem } from "./version-list-item";
-import { getPostVersionDetailAction } from "@/app/actions/admin/versions";
 
 interface VersionHistoryDialogProps {
   postId?: string | null;

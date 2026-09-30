@@ -82,6 +82,10 @@ export async function getPostVersionsAction(postId: string) {
   return versions.getPostVersionsAction(postId);
 }
 
+export async function getPostVersionDetailAction(versionId: string) {
+  return versions.getPostVersionDetailAction(versionId);
+}
+
 export async function restorePostVersionAction(versionId: string) {
   return versions.restorePostVersionAction(versionId);
 }
