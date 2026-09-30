@@ -68,29 +68,29 @@ export function CommentsSection({
           type: "success",
           text: res.message || "Your comment has been submitted.",
         });
-        const newCommentId = res.commentId;
-        if (res.status === "approved" && newCommentId) {
-          const newComment: PublicComment = {
-            id: newCommentId,
-            parentId: parentId || null,
-            authorName: authorName || "Anonymous",
-            content,
-            createdAt: new Date(),
-            replies: [],
-          };
+        const newCommentId = res.commentId || crypto.randomUUID();
+        const isApproved = res.status === "approved";
+        const newComment: PublicComment = {
+          id: newCommentId,
+          parentId: parentId || null,
+          authorName: authorName || "Anonymous",
+          content,
+          createdAt: new Date(),
+          isPending: !isApproved,
+          replies: [],
+        };
 
-          if (parentId) {
-            const addReply = (list: PublicComment[]): PublicComment[] =>
-              list.map((c) =>
-                c.id === parentId
-                  ? { ...c, replies: [...(c.replies || []), newComment] }
-                  : { ...c, replies: c.replies ? addReply(c.replies) : [] }
-              );
-            setComments((prev) => addReply(prev));
-            setActiveReplyId(null);
-          } else {
-            setComments((prev) => [newComment, ...prev]);
-          }
+        if (parentId) {
+          const addReply = (list: PublicComment[]): PublicComment[] =>
+            list.map((c) =>
+              c.id === parentId
+                ? { ...c, replies: [...(c.replies || []), newComment] }
+                : { ...c, replies: c.replies ? addReply(c.replies) : [] }
+            );
+          setComments((prev) => addReply(prev));
+          setActiveReplyId(null);
+        } else {
+          setComments((prev) => [newComment, ...prev]);
         }
         form.reset();
       } else {

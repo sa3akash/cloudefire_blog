@@ -1,8 +1,20 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Zap, Database, HardDrive, Globe, Sparkles } from "lucide-react";
+import { getAllSettings } from "@/lib/services/settings";
 
-export function HomeHero() {
+export async function HomeHero() {
+  const settings = await getAllSettings();
+  const badge = settings.heroBadge || "Next.js 16 + Cloudflare Free Tier";
+  const headline = settings.heroHeadline || "Engineering insights at the speed of light.";
+  const subheadline =
+    settings.heroSubheadline ||
+    "Explore deep dives into systems architecture, edge computing, and modern web performance. Engineered with zero external hosting dependencies.";
+  const primaryText = settings.heroCtaPrimaryText || "Browse Articles";
+  const primaryLink = settings.heroCtaPrimaryLink || "/blog";
+  const secondaryText = settings.heroCtaSecondaryText || "Architecture Overview";
+  const secondaryLink = settings.heroCtaSecondaryLink || "/about";
+
   return (
     <section className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-primary/5 via-card to-background p-6 sm:p-10 md:p-12 text-center md:text-left shadow-sm">
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -12,24 +24,24 @@ export function HomeHero() {
         <div className="space-y-4 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary font-mono shadow-xs">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Next.js 16 + Cloudflare Free Tier</span>
+            <span>{badge}</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black font-heading tracking-tight leading-tight">
-            Engineering insights at the <span className="text-primary underline decoration-primary/30">speed of light</span>.
+            {headline}
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-            Explore deep dives into systems architecture, edge computing, and modern web performance. Engineered with zero external hosting dependencies.
+            {subheadline}
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2 justify-center md:justify-start">
-            <Link href="/blog">
+            <Link href={primaryLink}>
               <Button className="gap-2 shadow-sm font-semibold">
-                <span>Browse Articles</span>
+                <span>{primaryText}</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link href="/about">
+            <Link href={secondaryLink}>
               <Button variant="outline" className="font-medium">
-                Architecture Overview
+                {secondaryText}
               </Button>
             </Link>
           </div>

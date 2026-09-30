@@ -10,6 +10,7 @@ import {
   setSessionCookie,
   clearSessionCookie,
   checkRateLimit,
+  resetRateLimit,
 } from "@/lib/auth";
 import { loginSchema, setupAdminSchema, generateSlug } from "@/lib/validation";
 import type { ActionResult } from "./types";
@@ -54,6 +55,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
 
   const session = await createSession(user.id);
   await setSessionCookie(session.token, session.expiresAt);
+  resetRateLimit(rateLimitKey);
 
   return { success: true, message: "Logged in successfully" };
 }
@@ -61,6 +63,11 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
 export async function logoutAction(): Promise<void> {
   await clearSessionCookie();
   redirect("/admin/login");
+}
+
+export async function logoutUserAction(): Promise<void> {
+  await clearSessionCookie();
+  redirect("/");
 }
 
 export async function setupAdminAction(formData: FormData): Promise<ActionResult> {

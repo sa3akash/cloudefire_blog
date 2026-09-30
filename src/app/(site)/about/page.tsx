@@ -26,7 +26,7 @@ export default async function AboutPage() {
   ]);
 
   return (
-    <div className="container mx-auto max-w-4xl px-4 sm:px-6 py-10 sm:py-16 space-y-16">
+    <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-16">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
 
       {/* Intro */}

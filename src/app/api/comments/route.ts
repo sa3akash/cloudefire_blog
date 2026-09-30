@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { submitComment } from "@/lib/services/comments";
 import { commentSchema } from "@/lib/validation";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     // Get IP for privacy-friendly hashing
     const forwarded = req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for");
     const ip = forwarded ? forwarded.split(",")[0].trim() : "unknown";
-    
+
     // Hash IP with subtle salt
     const encoder = new TextEncoder();
     const data = encoder.encode(ip + "-cloudblog-salt");
@@ -30,13 +31,18 @@ export async function POST(req: Request) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const ipHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 16);
 
+    const user = await getCurrentUser();
+    const finalAuthorName = authorName || user?.name || "Anonymous";
+    const finalAuthorEmail = authorEmail || user?.email || "anonymous@cloudblog.local";
+
     const result = await submitComment({
       postId,
       parentId: parentId || null,
-      authorName,
-      authorEmail,
+      authorName: finalAuthorName,
+      authorEmail: finalAuthorEmail,
       content,
       ipHash,
+      userId: user?.id,
     });
 
     return NextResponse.json({

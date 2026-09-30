@@ -17,6 +17,7 @@ import {
 } from "@/lib/seo";
 import { TableOfContents } from "@/components/blog/table-of-contents";
 import { ShareButtons } from "@/components/blog/share-buttons";
+import { LikeButton } from "@/components/blog/like-button";
 import { ArticleHeader } from "@/components/blog/article-header";
 import { ArticleNavigation } from "@/components/blog/article-navigation";
 import { ArticleTags } from "@/components/blog/article-tags";
@@ -113,7 +114,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           {isMultiCol && <div className="lg:hidden"><TableOfContents headings={headings} /></div>}
           <div className="prose-article" dangerouslySetInnerHTML={{ __html: renderedContent }} />
           <ArticleTags tags={post.tags} />
-          <div className="lg:hidden py-4 border-t border-border/80">
+          <div className="flex flex-wrap items-center justify-between gap-4 py-4 border-y border-border/80">
+            <LikeButton postId={post.id} />
             <ShareButtons title={post.title} url={fullUrl} />
           </div>
           <ArticleNavigation author={post.author} adjacent={adjacent} />
@@ -125,6 +127,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         {isMultiCol && (
           <aside className="hidden lg:block lg:col-span-4">
             <div className="sticky top-24 space-y-6">
+              <div className="p-4 rounded-2xl border border-border/80 bg-card/70 backdrop-blur-sm flex items-center justify-between">
+                <span className="text-xs font-semibold text-muted-foreground">Like this article</span>
+                <LikeButton postId={post.id} />
+              </div>
               <TableOfContents headings={headings} />
               <ShareButtons title={post.title} url={fullUrl} />
             </div>

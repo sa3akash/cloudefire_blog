@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { FollowButton } from "./follow-button";
 
 interface ArticleNavigationProps {
   author: {
@@ -33,10 +34,15 @@ export function ArticleNavigation({ author, adjacent }: ArticleNavigationProps) 
             {author.name[0]}
           </div>
         )}
-        <div className="space-y-2 text-center sm:text-left">
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Written by</span>
-            <h3 className="text-lg sm:text-xl font-bold font-heading text-foreground">{author.name}</h3>
+        <div className="space-y-2 text-center sm:text-left flex-1 min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">Written by</span>
+              <h3 className="text-lg sm:text-xl font-bold font-heading text-foreground">{author.name}</h3>
+            </div>
+            <div>
+              <FollowButton authorSlug={author.slug} />
+            </div>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {author.bio || "Staff contributor and systems engineer at CloudBlog."}

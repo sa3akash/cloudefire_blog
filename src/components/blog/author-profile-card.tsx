@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { User } from "lucide-react";
 import type { Author } from "@/lib/db";
+import { FollowButton } from "./follow-button";
 
 export function AuthorProfileCard({ author }: { author: Author }) {
   return (
@@ -20,10 +21,15 @@ export function AuthorProfileCard({ author }: { author: Author }) {
         </div>
       )}
 
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary font-mono">
-          <User className="w-3.5 h-3.5" />
-          <span>Author Profile</span>
+      <div className="space-y-3 flex-1 min-w-0">
+        <div className="flex flex-wrap items-center justify-center sm:justify-between gap-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary font-mono">
+            <User className="w-3.5 h-3.5" />
+            <span>Author Profile</span>
+          </div>
+          <div>
+            <FollowButton authorSlug={author.slug} />
+          </div>
         </div>
 
         <h1 className="text-3xl font-extrabold font-heading tracking-tight">

@@ -8,6 +8,7 @@ export interface PublicComment {
   authorName: string;
   content: string;
   createdAt: Date;
+  isPending?: boolean;
   replies?: PublicComment[];
 }
 
@@ -53,14 +54,15 @@ export async function submitComment(data: {
   authorEmail: string;
   content: string;
   ipHash?: string;
+  userId?: string;
 }): Promise<{ id: string; status: "pending" | "approved" }> {
   const db = getDb();
   const id = crypto.randomUUID();
   const now = new Date();
 
-  const autoApproveSetting = await getSetting("autoApproveComments", "false");
+  const autoApproveSetting = await getSetting("autoApproveComments", "true");
   const initialStatus: "pending" | "approved" =
-    autoApproveSetting === "true" ? "approved" : "pending";
+    data.userId || autoApproveSetting === "true" ? "approved" : "pending";
 
   await db.insert(comments).values({
     id,

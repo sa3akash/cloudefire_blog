@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ContactPageSkeleton() {
   return (
-    <div className="container mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-16 space-y-12 animate-pulse">
+    <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-12 animate-pulse">
       {/* Header Skeleton */}
       <div className="space-y-3 text-center sm:text-left">
         <Skeleton className="h-6 w-24 rounded-full" />
@@ -12,7 +12,7 @@ export function ContactPageSkeleton() {
       </div>
 
       {/* Form card Skeleton */}
-      <div className="p-8 rounded-2xl border border-border/80 bg-card/60 space-y-6">
+      <div className="p-8 max-w-3xl rounded-2xl border border-border/80 bg-card/60 space-y-6">
         <Skeleton className="h-6 w-36 rounded" />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

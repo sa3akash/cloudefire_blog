@@ -15,6 +15,7 @@ export * from "./audit-logs";
 export * from "./subscribers";
 export * from "./redirects";
 export * from "./post-reactions";
+export * from "./author-follows";
 
 // Relations
 export * from "./relations";

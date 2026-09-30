@@ -44,6 +44,11 @@ export function CommentItem({
               {comment.authorName[0]?.toUpperCase() || "A"}
             </div>
             <span className="font-semibold text-xs">{comment.authorName}</span>
+            {comment.isPending && (
+              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                Pending approval
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <time className="text-[11px] text-muted-foreground font-mono">{formattedDate}</time>
@@ -62,7 +67,18 @@ export function CommentItem({
         </div>
 
         <p className="text-xs text-foreground/90 whitespace-pre-wrap leading-relaxed pl-8">
-          {comment.content}
+          {comment.content.split(/(@[a-zA-Z0-9_-]+)/g).map((part, i) =>
+            part.startsWith("@") ? (
+              <span
+                key={i}
+                className="inline-flex items-center px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-[11px] font-semibold mx-0.5"
+              >
+                {part}
+              </span>
+            ) : (
+              part
+            )
+          )}
         </p>
 
         {hasReplies && (

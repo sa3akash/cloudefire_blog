@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
-import { Button } from "@/components/ui/button";
-import { Search, PenLine, Sparkles } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import { MobileNav } from "./mobile-nav";
+import { getCurrentUser } from "@/lib/auth";
+import { HeaderAuth } from "./header-auth";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const user = await getCurrentUser();
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/85 backdrop-blur-md transition-colors">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
@@ -63,16 +66,7 @@ export function SiteHeader() {
 
           <ThemeToggle />
 
-          <Link href="/admin">
-            <Button
-              variant="outline"
-              size="sm"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold rounded-lg shadow-2xs"
-            >
-              <PenLine className="h-3.5 w-3.5 text-primary" />
-              <span>Admin CMS</span>
-            </Button>
-          </Link>
+          <HeaderAuth user={user} />
 
           {/* Mobile Drawer Navigation */}
           <MobileNav />
@@ -81,3 +75,4 @@ export function SiteHeader() {
     </header>
   );
 }
+

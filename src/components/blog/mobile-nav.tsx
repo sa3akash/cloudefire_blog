@@ -18,10 +18,10 @@ export function MobileNav() {
   const links = [
     { href: "/", label: "Home", icon: Home },
     { href: "/blog", label: "Articles", icon: BookOpen },
+    { href: "/write", label: "Write Article", icon: PenLine },
     { href: "/search", label: "Search", icon: Search },
     { href: "/about", label: "About", icon: Info },
     { href: "/contact", label: "Contact", icon: Mail },
-    { href: "/admin", label: "Admin CMS", icon: PenLine },
   ];
 
   return (

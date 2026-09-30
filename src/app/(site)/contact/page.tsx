@@ -24,7 +24,7 @@ export default async function ContactPage() {
   ]);
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-16 space-y-12">
+    <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-12">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
 
       <div className="space-y-3 text-center sm:text-left">
@@ -41,7 +41,7 @@ export default async function ContactPage() {
         </p>
       </div>
 
-      <div className="p-8 rounded-2xl border border-border/80 bg-card/60 shadow-xs space-y-6">
+      <div className="p-8 max-w-3xl rounded-2xl border border-border/80 bg-card/60 shadow-xs space-y-6">
         <h2 className="font-bold text-lg font-heading tracking-tight">
           Send an Inquiry
         </h2>

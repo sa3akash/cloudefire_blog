@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { saveSettingsAction } from "@/app/actions/admin";
 import { Save, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { GeneralFields } from "./general-fields";
+import { HeroFields } from "./hero-fields";
 import { CommunityFields } from "./community-fields";
 import { BackupCard } from "./backup-card";
 
@@ -70,6 +71,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         <h2 className="text-lg font-bold font-heading">Publication & System Configuration</h2>
 
         <GeneralFields settings={initialSettings} />
+        <HeroFields settings={initialSettings} />
         <CommunityFields settings={initialSettings} />
 
         <div className="pt-2">
