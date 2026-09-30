@@ -11,8 +11,8 @@ export function ListingSkeleton({ count = 9 }: { count?: number }) {
       </div>
 
       {/* Filter / Search Bar Skeleton */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-xl border border-border/80 bg-card/60">
-        <Skeleton className="h-9 w-full md:w-80 rounded-lg" />
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 rounded-2xl border border-border/80 bg-card/60">
+        <Skeleton className="h-9.5 w-full md:w-80 rounded-xl" />
         <div className="flex items-center gap-2 flex-wrap w-full md:w-auto justify-end">
           <Skeleton className="h-6 w-20 rounded-full" />
           <Skeleton className="h-6 w-24 rounded-full" />

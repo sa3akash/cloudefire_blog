@@ -20,6 +20,7 @@ import { ShareButtons } from "@/components/blog/share-buttons";
 import { ArticleHeader } from "@/components/blog/article-header";
 import { ArticleNavigation } from "@/components/blog/article-navigation";
 import { ArticleTags } from "@/components/blog/article-tags";
+import { ReadingProgress } from "@/components/blog/reading-progress";
 import {
   RelatedPostsSection,
   RelatedPostsSkeleton,
@@ -93,6 +94,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   return (
     <article className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-12">
+      <ReadingProgress />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbs }} />
 
