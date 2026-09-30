@@ -25,7 +25,7 @@
   },
   "routes": [
     {
-      "pattern": "blogbd.eu.cc/*",
+      "pattern": "blogbd.eu.cc",
       "custom_domain": true
     }
   ]
