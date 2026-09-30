@@ -5,6 +5,7 @@ import { categories } from "./categories";
 import { tags } from "./tags";
 import { posts } from "./posts";
 import { postTags } from "./post-tags";
+import { postVersions } from "./post-versions";
 import { comments } from "./comments";
 import { sessions } from "./sessions";
 import { postViews } from "./post-views";
@@ -47,6 +48,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   comments: many(comments),
   views: many(postViews),
   reactions: many(postReactions),
+  versions: many(postVersions),
 }));
 
 export const postTagsRelations = relations(postTags, ({ one }) => ({
@@ -57,6 +59,13 @@ export const postTagsRelations = relations(postTags, ({ one }) => ({
   tag: one(tags, {
     fields: [postTags.tagId],
     references: [tags.id],
+  }),
+}));
+
+export const postVersionsRelations = relations(postVersions, ({ one }) => ({
+  post: one(posts, {
+    fields: [postVersions.postId],
+    references: [posts.id],
   }),
 }));
 

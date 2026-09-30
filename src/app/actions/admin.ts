@@ -6,6 +6,7 @@ import * as taxonomies from "./taxonomies";
 import * as comments from "./comments";
 import * as media from "./media";
 import * as settings from "./settings";
+import * as versions from "./versions";
 
 export async function loginAction(formData: FormData) {
   return auth.loginAction(formData);
@@ -75,6 +76,14 @@ export async function deleteMediaAction(id: string) {
 
 export async function saveSettingsAction(settingsMap: Record<string, string>) {
   return settings.saveSettingsAction(settingsMap);
+}
+
+export async function getPostVersionsAction(postId: string) {
+  return versions.getPostVersionsAction(postId);
+}
+
+export async function restorePostVersionAction(versionId: string) {
+  return versions.restorePostVersionAction(versionId);
 }
 
 export type { ActionResult } from "./types";

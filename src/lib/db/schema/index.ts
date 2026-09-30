@@ -5,6 +5,7 @@ export * from "./categories";
 export * from "./tags";
 export * from "./posts";
 export * from "./post-tags";
+export * from "./post-versions";
 export * from "./media";
 export * from "./comments";
 export * from "./sessions";

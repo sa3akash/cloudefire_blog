@@ -1,11 +1,12 @@
 "use client";
 
 import { RefObject } from "react";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormatButtons } from "./format-buttons";
 import { AlertButtons } from "./alert-buttons";
 import { ModeSwitcher } from "./mode-switcher";
+import { SnippetsDropdown } from "./snippets-dropdown";
 
 interface EditorToolbarProps {
   mode: "write" | "preview" | "split";
@@ -14,6 +15,7 @@ interface EditorToolbarProps {
   uploadingImage: boolean;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
+  onOpenPalette?: () => void;
 }
 
 export function EditorToolbar({
@@ -23,12 +25,14 @@ export function EditorToolbar({
   uploadingImage,
   onImageUpload,
   fileInputRef,
+  onOpenPalette,
 }: EditorToolbarProps) {
   return (
     <div className="flex items-center justify-between px-3 py-2 border-b border-border/80 bg-muted/30 flex-wrap gap-2">
-      <div className="flex items-center gap-1 flex-wrap">
+      <div className="flex items-center gap-1.5 flex-wrap">
         <FormatButtons insertText={insertText} />
         <AlertButtons insertText={insertText} />
+        <SnippetsDropdown onInsertSnippet={(s) => insertText(s)} />
 
         <div className="w-px h-5 bg-border mx-1" />
 
@@ -55,6 +59,20 @@ export function EditorToolbar({
           )}
           <span className="hidden sm:inline">Upload Image</span>
         </Button>
+
+        {onOpenPalette && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onOpenPalette}
+            className="h-8 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+            title="Open Command Palette (Ctrl+K or Ctrl+/)"
+          >
+            <Command className="w-3.5 h-3.5" />
+            <span className="hidden md:inline text-[10px] font-mono border border-border px-1 rounded">⌘K</span>
+          </Button>
+        )}
       </div>
 
       <ModeSwitcher mode={mode} setMode={setMode} />

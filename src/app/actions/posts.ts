@@ -5,12 +5,8 @@ import { getDb, authors } from "@/lib/db";
 import { eq } from "drizzle-orm";
 import { requireAuth } from "@/lib/auth";
 import { postSchema } from "@/lib/validation";
-import {
-  createPost,
-  updatePost,
-  deletePost,
-  duplicatePost,
-} from "@/lib/services/posts";
+import { createPost, updatePost, deletePost, duplicatePost } from "@/lib/services/posts";
+import { createPostVersion } from "@/lib/services/post-versions";
 import type { ActionResult } from "./types";
 
 export async function savePostAction(
@@ -61,6 +57,13 @@ export async function savePostAction(
         canonicalUrl: parsed.data.canonicalUrl || null,
       });
 
+      await createPostVersion(id, {
+        title: parsed.data.title,
+        content: parsed.data.content,
+        excerpt: parsed.data.excerpt,
+        createdBy: user.name || user.email,
+      }).catch(() => {});
+
       revalidatePath("/");
       revalidatePath("/blog");
       revalidatePath(`/blog/${parsed.data.slug}`);
@@ -85,6 +88,13 @@ export async function savePostAction(
         canonicalUrl: parsed.data.canonicalUrl || null,
         publishedAt: parsed.data.status === "published" ? new Date() : null,
       });
+
+      await createPostVersion(newId, {
+        title: parsed.data.title,
+        content: parsed.data.content,
+        excerpt: parsed.data.excerpt,
+        createdBy: user.name || user.email,
+      }).catch(() => {});
 
       revalidatePath("/");
       revalidatePath("/blog");
@@ -114,15 +124,9 @@ export async function deletePostAction(id: string): Promise<ActionResult> {
 }
 
 export async function duplicatePostAction(id: string): Promise<ActionResult> {
-  const user = await requireAuth();
-  const db = getDb();
-  const authorRecord = await db.select({ id: authors.id }).from(authors).where(eq(authors.userId, user.id)).limit(1);
-  const authorId = authorRecord[0]?.id;
-
-  if (!authorId) return { success: false, message: "Author profile not found" };
-
+  await requireAuth();
   try {
-    const newId = await duplicatePost(id, authorId);
+    const newId = await duplicatePost(id);
     revalidatePath("/admin/posts");
     return { success: true, message: "Article duplicated as draft", data: { id: newId } };
   } catch (err: unknown) {
