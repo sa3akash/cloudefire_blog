@@ -47,9 +47,6 @@ export async function getSitemapIndexChunks(): Promise<SitemapChunkId[]> {
 }
 
 export async function getSitemapCoreRoutes(baseUrl: string): Promise<MetadataRoute.Sitemap> {
-  const db = getDb();
-  const allCategories = await db.select({ slug: categories.slug, updatedAt: categories.updatedAt }).from(categories);
-
   const staticUrls: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },
     { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
@@ -58,75 +55,106 @@ export async function getSitemapCoreRoutes(baseUrl: string): Promise<MetadataRou
     { url: `${baseUrl}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
   ];
 
-  const categoryUrls: MetadataRoute.Sitemap = allCategories.map((c) => ({
-    url: `${baseUrl}/category/${c.slug}`,
-    lastModified: c.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  try {
+    const db = getDb();
+    const allCategories = await db.select({ slug: categories.slug, updatedAt: categories.updatedAt }).from(categories);
 
-  return [...staticUrls, ...categoryUrls];
+    const categoryUrls: MetadataRoute.Sitemap = allCategories.map((c) => ({
+      url: `${baseUrl}/category/${c.slug}`,
+      lastModified: c.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }));
+
+    return [...staticUrls, ...categoryUrls];
+  } catch {
+    return staticUrls;
+  }
 }
 
 export async function getSitemapPostsChunk(page: number, baseUrl: string): Promise<MetadataRoute.Sitemap> {
-  const db = getDb();
-  const offset = (Math.max(1, page) - 1) * SITEMAP_CHUNK_SIZE;
+  try {
+    const db = getDb();
+    const offset = (Math.max(1, page) - 1) * SITEMAP_CHUNK_SIZE;
 
-  const rows = await db
-    .select({
-      slug: posts.slug,
-      publishedAt: posts.publishedAt,
-      updatedAt: posts.updatedAt,
-      featured: posts.featured,
-    })
-    .from(posts)
-    .where(eq(posts.status, "published"))
-    .orderBy(desc(posts.publishedAt))
-    .limit(SITEMAP_CHUNK_SIZE)
-    .offset(offset);
+    const rows = await db
+      .select({
+        slug: posts.slug,
+        publishedAt: posts.publishedAt,
+        updatedAt: posts.updatedAt,
+        featured: posts.featured,
+      })
+      .from(posts)
+      .where(eq(posts.status, "published"))
+      .orderBy(desc(posts.publishedAt))
+      .limit(SITEMAP_CHUNK_SIZE)
+      .offset(offset);
 
-  return rows.map((p) => ({
-    url: `${baseUrl}/blog/${p.slug}`,
-    lastModified: p.updatedAt || p.publishedAt || new Date(),
-    changeFrequency: "weekly",
-    priority: p.featured ? 0.9 : 0.8,
-  }));
+    return rows.map((p) => ({
+      url: `${baseUrl}/blog/${p.slug}`,
+      lastModified: p.updatedAt || p.publishedAt || new Date(),
+      changeFrequency: "weekly",
+      priority: p.featured ? 0.9 : 0.8,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function getSitemapTagsChunk(page: number, baseUrl: string): Promise<MetadataRoute.Sitemap> {
-  const db = getDb();
-  const offset = (Math.max(1, page) - 1) * SITEMAP_CHUNK_SIZE;
+  try {
+    const db = getDb();
+    const offset = (Math.max(1, page) - 1) * SITEMAP_CHUNK_SIZE;
 
-  const rows = await db
-    .select({ slug: tags.slug, updatedAt: tags.updatedAt })
-    .from(tags)
-    .orderBy(desc(tags.updatedAt))
-    .limit(SITEMAP_CHUNK_SIZE)
-    .offset(offset);
+    const rows = await db
+      .select({ slug: tags.slug, updatedAt: tags.updatedAt })
+      .from(tags)
+      .orderBy(desc(tags.updatedAt))
+      .limit(SITEMAP_CHUNK_SIZE)
+      .offset(offset);
 
-  return rows.map((t) => ({
-    url: `${baseUrl}/tag/${t.slug}`,
-    lastModified: t.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }));
+    return rows.map((t) => ({
+      url: `${baseUrl}/tag/${t.slug}`,
+      lastModified: t.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function getSitemapAuthorsChunk(page: number, baseUrl: string): Promise<MetadataRoute.Sitemap> {
-  const db = getDb();
-  const offset = (Math.max(1, page) - 1) * SITEMAP_CHUNK_SIZE;
+  try {
+    const db = getDb();
+    const offset = (Math.max(1, page) - 1) * SITEMAP_CHUNK_SIZE;
 
-  const rows = await db
-    .select({ slug: authors.slug, updatedAt: authors.updatedAt })
-    .from(authors)
-    .orderBy(desc(authors.updatedAt))
-    .limit(SITEMAP_CHUNK_SIZE)
-    .offset(offset);
+    const rows = await db
+      .select({ slug: authors.slug, updatedAt: authors.updatedAt })
+      .from(authors)
+      .orderBy(desc(authors.updatedAt))
+      .limit(SITEMAP_CHUNK_SIZE)
+      .offset(offset);
 
-  return rows.map((a) => ({
-    url: `${baseUrl}/author/${a.slug}`,
-    lastModified: a.updatedAt,
-    changeFrequency: "weekly",
-    priority: 0.6,
-  }));
+    return rows.map((a) => ({
+      url: `${baseUrl}/author/${a.slug}`,
+      lastModified: a.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
+  } catch {
+    return [];
+  }
 }
+
+export async function getFullSitemap(baseUrl: string): Promise<MetadataRoute.Sitemap> {
+  const [core, postList, tagList, authorList] = await Promise.all([
+    getSitemapCoreRoutes(baseUrl),
+    getSitemapPostsChunk(1, baseUrl),
+    getSitemapTagsChunk(1, baseUrl),
+    getSitemapAuthorsChunk(1, baseUrl),
+  ]);
+
+  return [...core, ...postList, ...tagList, ...authorList];
+}
+
