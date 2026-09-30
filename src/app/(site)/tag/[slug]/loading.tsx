@@ -1,5 +1,5 @@
-import { ListingSkeleton } from "@/components/blog/skeletons";
+import { CategoryTagSkeleton } from "@/components/blog/skeletons";
 
 export default function TagLoading() {
-  return <ListingSkeleton count={9} />;
+  return <CategoryTagSkeleton isTag={true} count={9} />;
 }

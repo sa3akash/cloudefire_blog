@@ -1,6 +1,9 @@
-export { PostCardSkeleton, FeaturedPostCardSkeleton } from "./post-card-skeleton";
-export { ArticleSkeleton } from "./article-skeleton";
-export { ListingSkeleton, AuthorPageSkeleton } from "./listing-skeleton";
-export { HomePageSkeleton } from "./home-skeleton";
-export { AboutPageSkeleton } from "./about-skeleton";
-export { ContactPageSkeleton } from "./contact-skeleton";
+export * from "./post-card-skeleton";
+export * from "./listing-skeleton";
+export * from "./category-skeleton";
+export * from "./author-skeleton";
+export * from "./search-skeleton";
+export * from "./article-skeleton";
+export * from "./home-skeleton";
+export * from "./about-skeleton";
+export * from "./contact-skeleton";

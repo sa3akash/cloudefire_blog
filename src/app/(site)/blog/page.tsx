@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { buildPageMetadata, generateBreadcrumbJsonLd } from "@/lib/seo";
+import {
+  buildPageMetadata,
+  generateBreadcrumbJsonLd,
+  generateCollectionJsonLd,
+} from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "All Articles | CloudBlog",
@@ -51,9 +57,18 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
     { name: "Blog", url: "/blog" },
   ]);
 
+  const collectionJsonLd = generateCollectionJsonLd({
+    name: "All Articles & Publications",
+    description: "Deep technical insights, systems architecture, and edge engineering tutorials.",
+    url: "/blog",
+    count: postsData.total,
+  });
+
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10" >
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: collectionJsonLd }} />
+
       <div className="space-y-3 text-center sm:text-left">
         <h1 className="text-3xl sm:text-4xl font-extrabold font-heading tracking-tight">
           Articles &amp; Publications
@@ -71,40 +86,38 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         search={search}
       />
 
-  {
-    postsData.posts.length === 0 ? (
-      <div className="text-center py-20 border border-dashed border-border rounded-xl space-y-3">
-        <BookOpen className="w-8 h-8 text-muted-foreground mx-auto opacity-50" />
-        <h3 className="font-semibold text-base font-heading">No articles found</h3>
-        <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-          Try adjusting your search criteria or topic filters to find what you are looking for.
-        </p>
-        <Link href="/blog">
-          <Button variant="outline" size="sm" className="mt-2 text-xs">
-            Clear filters
-          </Button>
-        </Link>
-      </div>
-    ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {postsData.posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
-    </div>
-  )
-  }
+      {postsData.posts.length === 0 ? (
+        <div className="text-center py-20 border border-dashed border-border rounded-xl space-y-3">
+          <BookOpen className="w-8 h-8 text-muted-foreground mx-auto opacity-50" />
+          <h3 className="font-semibold text-base font-heading">No articles found</h3>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+            Try adjusting your search criteria or topic filters to find what you are looking for.
+          </p>
+          <Link href="/blog">
+            <Button variant="outline" size="sm" className="mt-2 text-xs">
+              Clear filters
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {postsData.posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
 
-  <PaginationBar
-    currentPage={postsData.page}
-    totalPages={postsData.totalPages}
-    basePath="/blog"
-    searchParams={{
-      category: categorySlug,
-      tag: tagSlug,
-      sort,
-      q: search,
-    }}
-  />
-    </div >
+      <PaginationBar
+        currentPage={postsData.page}
+        totalPages={postsData.totalPages}
+        basePath="/blog"
+        searchParams={{
+          category: categorySlug,
+          tag: tagSlug,
+          sort,
+          q: search,
+        }}
+      />
+    </div>
   );
 }

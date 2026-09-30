@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function AboutPageSkeleton() {
   return (
-    <div className="container mx-auto max-w-4xl px-4 sm:px-6 py-10 sm:py-16 space-y-16 animate-pulse">
+    <div className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-16 animate-pulse">
       {/* Intro Skeleton */}
       <div className="space-y-4 text-center sm:text-left">
         <Skeleton className="h-6 w-52 rounded-full" />

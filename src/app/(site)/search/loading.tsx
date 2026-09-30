@@ -1,5 +1,5 @@
-import { ListingSkeleton } from "@/components/blog/skeletons";
+import { SearchPageSkeleton } from "@/components/blog/skeletons";
 
 export default function SearchLoading() {
-  return <ListingSkeleton count={6} />;
+  return <SearchPageSkeleton count={6} />;
 }

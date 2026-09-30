@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function ArticleSkeleton() {
   return (
-    <article className="container mx-auto max-w-5xl px-4 sm:px-6 py-10 sm:py-16 space-y-12 animate-pulse">
+    <article className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-12 animate-pulse">
       {/* Article Header Skeleton */}
       <div className="space-y-8">
         <div className="space-y-6 text-center max-w-3xl mx-auto flex flex-col items-center">
@@ -24,7 +24,7 @@ export function ArticleSkeleton() {
 
         {/* Hero Cover Image Skeleton */}
         <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden rounded-3xl bg-muted/60 border border-border/80">
-          <Skeleton className="w-full h-full" />
+          <Skeleton className="w-full h-full rounded-3xl" />
         </div>
       </div>
 
@@ -47,18 +47,18 @@ export function ArticleSkeleton() {
           </div>
 
           {/* Code block shimmer */}
-          <div className="rounded-xl border border-border/80 bg-neutral-950 p-4 space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-neutral-800">
+          <div className="rounded-xl border border-border/80 bg-card p-4 space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-border/60">
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-neutral-800" />
-                <div className="w-2.5 h-2.5 rounded-full bg-neutral-800" />
-                <div className="w-2.5 h-2.5 rounded-full bg-neutral-800" />
+                <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
+                <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
+                <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/30" />
               </div>
-              <Skeleton className="h-5 w-12 rounded bg-neutral-800" />
+              <Skeleton className="h-5 w-12 rounded" />
             </div>
-            <Skeleton className="h-4 w-3/4 bg-neutral-800/80 rounded" />
-            <Skeleton className="h-4 w-1/2 bg-neutral-800/80 rounded" />
-            <Skeleton className="h-4 w-2/3 bg-neutral-800/80 rounded" />
+            <Skeleton className="h-4 w-3/4 rounded" />
+            <Skeleton className="h-4 w-1/2 rounded" />
+            <Skeleton className="h-4 w-2/3 rounded" />
           </div>
 
           <div className="space-y-3">

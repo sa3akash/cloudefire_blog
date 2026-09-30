@@ -3,7 +3,9 @@ import { getSetting } from "@/lib/services/settings";
 import { Cpu, Database, HardDrive, ShieldCheck, Zap, Layers, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, generateBreadcrumbJsonLd } from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "About Architecture | CloudBlog",
@@ -18,8 +20,15 @@ export default async function AboutPage() {
     "CloudBlog is an open-source, edge-native blogging platform engineered specifically for Cloudflare's free tier."
   );
 
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "About", url: "/about" },
+  ]);
+
   return (
     <div className="container mx-auto max-w-4xl px-4 sm:px-6 py-10 sm:py-16 space-y-16">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
+
       {/* Intro */}
       <div className="space-y-4 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary font-mono">

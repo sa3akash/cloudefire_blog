@@ -10,7 +10,7 @@ export function SiteFooter() {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (email.trim() && email.includes("@")) {
       setSubscribed(true);

@@ -5,7 +5,13 @@ import { PostCard } from "@/components/blog/post-card";
 import { PaginationBar } from "@/components/blog/pagination-bar";
 import type { Metadata } from "next";
 import { Folder } from "lucide-react";
-import { buildPageMetadata, generateBreadcrumbJsonLd } from "@/lib/seo";
+import {
+  buildPageMetadata,
+  generateBreadcrumbJsonLd,
+  generateCollectionJsonLd,
+} from "@/lib/seo";
+
+export const dynamic = "force-dynamic";
 
 interface CategoryPageProps {
   params: Promise<{
@@ -59,9 +65,17 @@ export default async function CategoryPage({
     { name: category.name, url: `/category/${category.slug}` },
   ]);
 
+  const collectionJsonLd = generateCollectionJsonLd({
+    name: `${category.name} Articles`,
+    description: category.description || `Articles in category ${category.name}`,
+    url: `/category/${category.slug}`,
+    count: postsData.total,
+  });
+
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10" >
+    <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: collectionJsonLd }} />
 
       <div className="space-y-3 border-b border-border/60 pb-8 text-center sm:text-left">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary font-mono">
@@ -78,25 +92,23 @@ export default async function CategoryPage({
         )}
       </div>
 
-  {
-    postsData.posts.length === 0 ? (
-      <div className="text-center py-16 border border-dashed border-border rounded-xl text-muted-foreground">
-        No articles found in this category yet.
-      </div>
-    ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {postsData.posts.map((post) => (
-        <PostCard key={post.id} post={post} />
-      ))}
-    </div>
-  )
-  }
+      {postsData.posts.length === 0 ? (
+        <div className="text-center py-16 border border-dashed border-border rounded-xl text-muted-foreground">
+          No articles found in this category yet.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {postsData.posts.map((post) => (
+            <PostCard key={post.id} post={post} />
+          ))}
+        </div>
+      )}
 
-  <PaginationBar
-    currentPage={postsData.page}
-    totalPages={postsData.totalPages}
-    basePath={`/category/${category.slug}`}
-  />
-    </div >
+      <PaginationBar
+        currentPage={postsData.page}
+        totalPages={postsData.totalPages}
+        basePath={`/category/${category.slug}`}
+      />
+    </div>
   );
 }
