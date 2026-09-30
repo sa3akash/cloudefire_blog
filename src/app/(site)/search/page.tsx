@@ -5,11 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search as SearchIcon } from "lucide-react";
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Search Articles | CloudBlog",
-  description: "Search technical articles, architecture teardowns, and engineering guides on CloudBlog.",
-};
+  description:
+    "Search technical articles, architecture teardowns, and engineering guides on CloudBlog. Find content on Cloudflare Workers, Next.js, D1 database, and edge computing.",
+  path: "/search",
+  noIndex: true,
+});
 
 interface SearchPageProps {
   searchParams: Promise<{

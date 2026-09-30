@@ -78,3 +78,49 @@ export function generateWebSiteJsonLd(siteName: string, siteDescription: string)
 
   return JSON.stringify(schema, null, 2);
 }
+
+export function generatePersonJsonLd(author: {
+  name: string;
+  slug: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
+}): string {
+  const baseUrl = getBaseUrl();
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: author.name,
+    url: `${baseUrl}/author/${author.slug}`,
+    description: author.bio || undefined,
+    image: author.avatarUrl || undefined,
+    mainEntityOfPage: `${baseUrl}/author/${author.slug}`,
+  };
+
+  return JSON.stringify(schema, null, 2);
+}
+
+export function generateCollectionJsonLd({
+  name,
+  description,
+  url,
+  count,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  count?: number;
+}): string {
+  const baseUrl = getBaseUrl();
+  const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: fullUrl,
+    numberOfItems: count,
+  };
+
+  return JSON.stringify(schema, null, 2);
+}
+

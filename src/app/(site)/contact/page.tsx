@@ -4,11 +4,14 @@ import { Mail, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Contact Editorial | CloudBlog",
-  description: "Get in touch with the CloudBlog editorial team.",
-};
+  description:
+    "Get in touch with the CloudBlog editorial team. We welcome architecture questions, editorial feedback, guest submissions, and collaboration inquiries.",
+  path: "/contact",
+});
 
 export default async function ContactPage() {
   const contactEmail = await getSetting("contactEmail", "contact@cloudblog.local");

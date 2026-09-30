@@ -5,6 +5,7 @@ import { PostCard } from "@/components/blog/post-card";
 import { PaginationBar } from "@/components/blog/pagination-bar";
 import type { Metadata } from "next";
 import { Folder } from "lucide-react";
+import { buildPageMetadata, generateBreadcrumbJsonLd } from "@/lib/seo";
 
 interface CategoryPageProps {
   params: Promise<{
@@ -22,10 +23,13 @@ export async function generateMetadata({
   const category = await getCategoryBySlug(resolved.slug);
   if (!category) return { title: "Category Not Found | CloudBlog" };
 
-  return {
+  return buildPageMetadata({
     title: `${category.name} Articles | CloudBlog`,
-    description: category.description || `Browse articles in category ${category.name}`,
-  };
+    description:
+      category.description ||
+      `Browse all articles published under the "${category.name}" category on CloudBlog. Covering edge computing, architecture, and engineering.`,
+    path: `/category/${category.slug}`,
+  });
 }
 
 export default async function CategoryPage({
@@ -49,8 +53,16 @@ export default async function CategoryPage({
     limit: 9,
   });
 
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Blog", url: "/blog" },
+    { name: category.name, url: `/category/${category.slug}` },
+  ]);
+
   return (
     <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
+
       <div className="space-y-3 border-b border-border/60 pb-8 text-center sm:text-left">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary font-mono">
           <Folder className="w-3.5 h-3.5" />

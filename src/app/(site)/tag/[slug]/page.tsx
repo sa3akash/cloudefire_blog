@@ -5,6 +5,7 @@ import { PostCard } from "@/components/blog/post-card";
 import { PaginationBar } from "@/components/blog/pagination-bar";
 import type { Metadata } from "next";
 import { Tag as TagIcon } from "lucide-react";
+import { buildPageMetadata, generateBreadcrumbJsonLd } from "@/lib/seo";
 
 interface TagPageProps {
   params: Promise<{
@@ -22,10 +23,11 @@ export async function generateMetadata({
   const tag = await getTagBySlug(resolved.slug);
   if (!tag) return { title: "Tag Not Found | CloudBlog" };
 
-  return {
+  return buildPageMetadata({
     title: `#${tag.name} Articles | CloudBlog`,
-    description: `Browse articles tagged with #${tag.name} on CloudBlog`,
-  };
+    description: `Browse all articles and technical guides tagged with #${tag.name} on CloudBlog. Deep dives into edge computing, architecture, and modern web engineering.`,
+    path: `/tag/${tag.slug}`,
+  });
 }
 
 export default async function TagPage({ params, searchParams }: TagPageProps) {
@@ -46,8 +48,16 @@ export default async function TagPage({ params, searchParams }: TagPageProps) {
     limit: 9,
   });
 
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Blog", url: "/blog" },
+    { name: `#${tag.name}`, url: `/tag/${tag.slug}` },
+  ]);
+
   return (
     <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
+
       <div className="space-y-3 border-b border-border/60 pb-8 text-center sm:text-left">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary font-mono">
           <TagIcon className="w-3.5 h-3.5" />

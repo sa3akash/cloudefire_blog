@@ -7,11 +7,14 @@ import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { buildPageMetadata, generateBreadcrumbJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "All Articles | CloudBlog",
-  description: "Browse all articles, technical guides, and architectural breakdowns on CloudBlog.",
-};
+  description:
+    "Browse all articles, technical guides, and architectural breakdowns on Next.js, Cloudflare Workers, edge computing, and modern full-stack engineering.",
+  path: "/blog",
+});
 
 interface BlogPageProps {
   searchParams: Promise<{
@@ -43,8 +46,14 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
     getAllCategories(),
   ]);
 
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Blog", url: "/blog" },
+  ]);
+
   return (
     <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
       <div className="space-y-3 text-center sm:text-left">
         <h1 className="text-3xl sm:text-4xl font-extrabold font-heading tracking-tight">
           Articles &amp; Publications

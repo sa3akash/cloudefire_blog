@@ -71,3 +71,60 @@ export function buildArticleMetadata(data: ArticleSeoData): Metadata {
     },
   };
 }
+
+export interface PageSeoOptions {
+  title: string;
+  description: string;
+  path?: string;
+  image?: string;
+  noIndex?: boolean;
+}
+
+export function buildPageMetadata(opts: PageSeoOptions): Metadata {
+  const baseUrl = getBaseUrl();
+  const url = opts.path ? `${baseUrl}${opts.path}` : baseUrl;
+  const image = opts.image || `${baseUrl}/og-default.png`;
+
+  return {
+    title: opts.title.includes("|") ? opts.title : `${opts.title} | CloudBlog`,
+    description: opts.description,
+    alternates: {
+      canonical: url,
+    },
+    robots: opts.noIndex
+      ? { index: false, follow: true }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+          },
+        },
+    openGraph: {
+      title: opts.title,
+      description: opts.description,
+      url,
+      siteName: "CloudBlog",
+      type: "website",
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: opts.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: opts.title,
+      description: opts.description,
+      images: [image],
+    },
+  };
+}
+

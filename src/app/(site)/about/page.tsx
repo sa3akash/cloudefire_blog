@@ -3,11 +3,14 @@ import { getSetting } from "@/lib/services/settings";
 import { Cpu, Database, HardDrive, ShieldCheck, Zap, Layers, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "About Architecture | CloudBlog",
-  description: "Learn how CloudBlog runs a production-grade publication platform entirely on Cloudflare's free tier.",
-};
+  description:
+    "Learn how CloudBlog runs a production-grade, high-performance publication platform entirely on Cloudflare's free tier — Workers, D1 SQLite, and R2 object storage.",
+  path: "/about",
+});
 
 export default async function AboutPage() {
   const aboutText = await getSetting(

@@ -7,6 +7,7 @@ import { PostCard } from "@/components/blog/post-card";
 import { PaginationBar } from "@/components/blog/pagination-bar";
 import type { Metadata } from "next";
 import { User } from "lucide-react";
+import { buildPageMetadata, generateBreadcrumbJsonLd, getBaseUrl } from "@/lib/seo";
 
 interface AuthorPageProps {
   params: Promise<{
@@ -30,11 +31,16 @@ export async function generateMetadata({
 
   if (authorRes.length === 0) return { title: "Author Not Found | CloudBlog" };
   const author = authorRes[0];
+  const baseUrl = getBaseUrl();
 
-  return {
+  return buildPageMetadata({
     title: `${author.name} | CloudBlog Author`,
-    description: author.bio || `Read articles written by ${author.name} on CloudBlog.`,
-  };
+    description:
+      author.bio ||
+      `Read technical articles and engineering guides written by ${author.name} on CloudBlog.`,
+    path: `/author/${author.slug}`,
+    image: author.avatarUrl || undefined,
+  });
 }
 
 export default async function AuthorPage({
@@ -65,8 +71,16 @@ export default async function AuthorPage({
     limit: 9,
   });
 
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd([
+    { name: "Home", url: "/" },
+    { name: "Authors", url: "/blog" },
+    { name: author.name, url: `/author/${author.slug}` },
+  ]);
+
   return (
     <div className="container mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12 space-y-12">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbJsonLd }} />
+
       {/* Author Profile Card */}
       <div className="p-8 sm:p-10 rounded-2xl border border-border/80 bg-card/60 flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
         {author.avatarUrl ? (
