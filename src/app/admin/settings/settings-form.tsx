@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { saveSettingsAction } from "@/app/actions/admin";
-import { Save, Download, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Save, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { BackupCard } from "./backup-card";
 
 interface SettingsFormProps {
   initialSettings: Record<string, string>;
@@ -26,8 +27,12 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     setFeedback(null);
 
     const formData = new FormData(e.currentTarget);
-    const result = await saveSettingsAction(formData);
+    const settingsMap: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      settingsMap[key] = value.toString();
+    });
 
+    const result = await saveSettingsAction(settingsMap);
     setLoading(false);
 
     if (result.success) {
@@ -57,7 +62,6 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </div>
       )}
 
-      {/* Main Settings Form */}
       <form onSubmit={handleSubmit} className="p-8 rounded-2xl border border-border/80 bg-card shadow-xs space-y-6">
         <h2 className="text-lg font-bold font-heading">General Site Settings</h2>
 
@@ -105,86 +109,40 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground" htmlFor="contactEmail">
-              Editorial Contact Email
+              Contact Email
             </label>
             <Input
               id="contactEmail"
               name="contactEmail"
               type="email"
               defaultValue={initialSettings.contactEmail || "contact@cloudblog.local"}
-              className="h-9 text-xs font-mono"
+              className="h-9 text-xs"
             />
           </div>
         </div>
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground" htmlFor="aboutText">
-            About Section Statement
+            About Summary
           </label>
           <Textarea
             id="aboutText"
             name="aboutText"
             defaultValue={initialSettings.aboutText || ""}
-            rows={4}
+            rows={3}
             className="text-xs resize-none"
           />
         </div>
 
-        {/* Comment Settings */}
-        <div className="pt-4 border-t border-border/60 space-y-3">
-          <h3 className="text-sm font-semibold font-heading">Discussion &amp; Comments</h3>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="allowComments"
-              name="allowComments"
-              defaultChecked={initialSettings.allowComments === "true"}
-              className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-            />
-            <label htmlFor="allowComments" className="text-xs font-medium cursor-pointer">
-              Enable public comments on articles
-            </label>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="autoApproveComments"
-              name="autoApproveComments"
-              defaultChecked={initialSettings.autoApproveComments === "true"}
-              className="rounded border-border text-primary focus:ring-primary w-4 h-4 cursor-pointer"
-            />
-            <label htmlFor="autoApproveComments" className="text-xs font-medium cursor-pointer">
-              Auto-approve comments (Bypasses manual moderation queue)
-            </label>
-          </div>
-        </div>
-
-        <div className="pt-4 border-t border-border/60 flex items-center justify-end">
-          <Button type="submit" disabled={loading} size="sm" className="gap-1.5 text-xs">
+        <div className="pt-2">
+          <Button type="submit" size="sm" disabled={loading} className="gap-2 text-xs">
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             <span>Save Settings</span>
           </Button>
         </div>
       </form>
 
-      {/* Backup and Disaster Recovery Box */}
-      <div className="p-8 rounded-2xl border border-border/80 bg-card shadow-xs space-y-4">
-        <div>
-          <h2 className="text-lg font-bold font-heading">Backup &amp; Disaster Recovery</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Export a full JSON dump of your D1 database containing all posts, categories, tags, comments, and settings.
-          </p>
-        </div>
-
-        <a href="/api/admin/export" download className="inline-block">
-          <Button variant="outline" size="sm" className="gap-2 text-xs">
-            <Download className="w-3.5 h-3.5 text-primary" />
-            <span>Download Database Backup (.json)</span>
-          </Button>
-        </a>
-      </div>
+      <BackupCard />
     </div>
   );
 }

@@ -23,7 +23,9 @@ export function TagManager({ initialTags }: { initialTags: TagWithCount[] }) {
     if (!name.trim()) return;
 
     setLoading(true);
-    const res = await saveTagAction(name.trim());
+    const cleanName = name.trim();
+    const slug = cleanName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const res = await saveTagAction({ name: cleanName, slug });
     setLoading(false);
 
     if (res.success) {
