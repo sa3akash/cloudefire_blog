@@ -20,5 +20,11 @@
   "vars": {
     "SITE_URL": "http://localhost:3000",
     "SITE_NAME": "CloudBlog"
-  }
+  },
+  "routes": [
+    {
+      "pattern": "blogbd.eu.cc",
+      "custom_domain": true
+    }
+  ],
 }
