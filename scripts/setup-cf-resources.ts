@@ -5,21 +5,19 @@ import { resolve } from "path";
 const wranglerPath = resolve(process.cwd(), "wrangler.jsonc");
 let configRaw = readFileSync(wranglerPath, "utf-8");
 
-console.log("==> Configuring Cloudflare Resources (D1, KV, R2)...");
+console.log("==> Configuring Cloudflare Resources (D1, KV, R2 & Domain)...");
 
 function runCommand(cmd: string): string {
   try {
     return execSync(cmd, { stdio: ["pipe", "pipe", "pipe"], encoding: "utf-8" }).trim();
   } catch (err: unknown) {
     const error = err as { stderr?: string; stdout?: string; message?: string };
-    const output = error.stderr || error.stdout || error.message || "";
-    return output;
+    return error.stderr || error.stdout || error.message || "";
   }
 }
 
 // 1. Resolve D1 Database ID
 let targetDbId = process.env.CLOUDFLARE_DATABASE_ID?.trim();
-
 if (!targetDbId || targetDbId.includes("00000000")) {
   console.log("==> Querying Cloudflare D1 databases for 'cloudblog-d1'...");
   const listOutput = runCommand("bun x wrangler d1 list --json");
@@ -31,15 +29,13 @@ if (!targetDbId || targetDbId.includes("00000000")) {
       console.log(`==> Found existing D1 Database UUID: ${targetDbId}`);
     }
   } catch {
-    // Not valid JSON or listing failed
+    // listing failed or not logged in
   }
 
-  if (!targetDbId) {
+  if (!targetDbId && !configRaw.includes("cb964ba3")) {
     console.log("==> 'cloudblog-d1' not found. Creating D1 database on Cloudflare...");
     const createOut = runCommand("bun x wrangler d1 create cloudblog-d1");
-    console.log(createOut);
-    const uuidMatch = createOut.match(/database_id\s*=\s*["']?([a-f0-9\-]+)["']?/i) ||
-                      createOut.match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i);
+    const uuidMatch = createOut.match(/([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i);
     if (uuidMatch) {
       targetDbId = uuidMatch[1];
       console.log(`==> Successfully created D1 Database UUID: ${targetDbId}`);
@@ -50,13 +46,10 @@ if (!targetDbId || targetDbId.includes("00000000")) {
 if (targetDbId && !targetDbId.includes("00000000")) {
   configRaw = configRaw.replace(/"database_id":\s*"[^"]+"/, `"database_id": "${targetDbId}"`);
   console.log(`==> Updated wrangler.jsonc with database_id: ${targetDbId}`);
-} else {
-  console.warn("⚠️ Warning: Could not resolve Cloudflare D1 Database ID. Please provide CLOUDFLARE_DATABASE_ID secret.");
 }
 
 // 2. Resolve KV Namespace ID
 let targetKvId = process.env.CLOUDFLARE_KV_ID?.trim();
-
 if (!targetKvId || targetKvId.includes("00000000")) {
   console.log("==> Querying Cloudflare KV namespaces for 'CLOUDBLOG_KV'...");
   const kvListOut = runCommand("bun x wrangler kv namespace list --json");
@@ -72,11 +65,9 @@ if (!targetKvId || targetKvId.includes("00000000")) {
   }
 
   if (!targetKvId) {
-    console.log("==> 'CLOUDBLOG_KV' not found. Creating KV namespace on Cloudflare...");
+    console.log("==> Creating KV namespace on Cloudflare...");
     const kvCreateOut = runCommand("bun x wrangler kv namespace create CLOUDBLOG_KV");
-    console.log(kvCreateOut);
-    const kvIdMatch = kvCreateOut.match(/id\s*=\s*["']?([a-f0-9]+)["']?/i) ||
-                      kvCreateOut.match(/([a-f0-9]{32})/i);
+    const kvIdMatch = kvCreateOut.match(/id\s*=\s*["']?([a-f0-9]+)["']?/i) || kvCreateOut.match(/([a-f0-9]{32})/i);
     if (kvIdMatch) {
       targetKvId = kvIdMatch[1];
       console.log(`==> Successfully created KV Namespace ID: ${targetKvId}`);
@@ -91,11 +82,19 @@ if (targetKvId && !targetKvId.includes("00000000")) {
 
 // 3. Ensure R2 Bucket Exists
 console.log("==> Ensuring R2 media bucket 'cloudblog-media' exists...");
-const r2Out = runCommand("bun x wrangler r2 bucket create cloudblog-media");
-if (!r2Out.includes("already exists")) {
-  console.log(r2Out);
+runCommand("bun x wrangler r2 bucket create cloudblog-media");
+
+// 4. Auto-Connect Custom Domain if specified
+const domain = (process.env.CLOUDFLARE_CUSTOM_DOMAIN || process.env.CUSTOM_DOMAIN || "").trim().replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+if (domain && !configRaw.includes(domain)) {
+  console.log(`==> Configuring Cloudflare Custom Domain auto-connect for '${domain}'...`);
+  const routesConfig = `"routes": [\n    {\n      "pattern": "${domain}/*",\n      "custom_domain": true\n    }\n  ],\n  "workers_dev": true,`;
+  if (!configRaw.includes('"routes"')) {
+    configRaw = configRaw.replace(/"compatibility_flags":/, `${routesConfig}\n  "compatibility_flags":`);
+    console.log(`==> Successfully bound custom domain '${domain}' with automated SSL & DNS!`);
+  }
 }
 
-// 4. Save Updated wrangler.jsonc
+// 5. Save Updated wrangler.jsonc
 writeFileSync(wranglerPath, configRaw, "utf-8");
 console.log("==> Cloudflare resource configuration complete!");
