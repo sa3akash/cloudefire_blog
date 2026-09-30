@@ -37,7 +37,7 @@ export function CommentItem({
 
   return (
     <div className={`space-y-3 ${depth > 0 ? "ml-5 pl-4 border-l-2 border-primary/20" : ""}`}>
-      <article className="p-4 rounded-xl border border-border/70 bg-card space-y-2">
+      <article className="p-4 sm:p-5 rounded-2xl border border-border/80 bg-card/70 backdrop-blur-sm shadow-xs space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">

@@ -40,12 +40,13 @@ export function TableOfContents({ headings }: TocProps) {
   if (headings.length === 0) return null;
 
   return (
-    <nav className="p-4 rounded-xl border border-border/70 bg-card/60 backdrop-blur-sm space-y-3">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+    <nav className="p-5 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md shadow-xs space-y-3.5">
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground font-mono">
         <List className="w-3.5 h-3.5 text-primary" />
-        <span>Table of Contents</span>
+        <span>On this page</span>
       </div>
-      <ul className="space-y-1.5 text-xs">
+      <div className="h-px bg-border/60" />
+      <ul className="space-y-1 text-xs">
         {headings.map((h) => {
           const isActive = activeId === h.id;
           return (
@@ -55,10 +56,10 @@ export function TableOfContents({ headings }: TocProps) {
             >
               <a
                 href={`#${h.id}`}
-                className={`block py-1 transition-colors leading-snug hover:text-foreground ${
+                className={`block py-1.5 px-2 rounded-lg transition-all duration-150 leading-snug ${
                   isActive
-                    ? "font-semibold text-primary"
-                    : "text-muted-foreground"
+                    ? "font-semibold text-primary bg-primary/10 border-l-2 border-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
               >
                 {h.text}

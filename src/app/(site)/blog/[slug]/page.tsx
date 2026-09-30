@@ -108,18 +108,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         coverImage={post.coverImage}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <aside className="hidden lg:block lg:col-span-3">
-          <div className="sticky top-24 space-y-6">
-            <TableOfContents headings={headings} />
-            <ShareButtons title={post.title} url={fullUrl} />
-          </div>
-        </aside>
-
-        <div className="lg:col-span-9 space-y-10 min-w-0">
+      <div className={`grid grid-cols-1 ${headings.length > 0 ? "lg:grid-cols-12" : "max-w-3xl mx-auto"} gap-10`}>
+        <div className={`${headings.length > 0 ? "lg:col-span-8" : "w-full"} space-y-10 min-w-0`}>
+          {headings.length > 0 && (
+            <div className="lg:hidden">
+              <TableOfContents headings={headings} />
+            </div>
+          )}
           <div className="prose-article" dangerouslySetInnerHTML={{ __html: renderedContent }} />
           <ArticleTags tags={post.tags} />
-          <div className="lg:hidden py-4 border-t border-b border-border/80">
+          <div className="lg:hidden py-4 border-t border-border/80">
             <ShareButtons title={post.title} url={fullUrl} />
           </div>
           <ArticleNavigation author={post.author} adjacent={adjacent} />
@@ -127,6 +125,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             <CommentsSection postId={post.id} initialComments={comments} />
           )}
         </div>
+
+        {headings.length > 0 && (
+          <aside className="hidden lg:block lg:col-span-4">
+            <div className="sticky top-24 space-y-6">
+              <TableOfContents headings={headings} />
+              <ShareButtons title={post.title} url={fullUrl} />
+            </div>
+          </aside>
+        )}
       </div>
 
       <RelatedPosts posts={relatedPosts} />

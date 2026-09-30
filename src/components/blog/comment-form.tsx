@@ -23,7 +23,7 @@ export function CommentForm({
   onCancelReply,
 }: CommentFormProps) {
   return (
-    <div className="p-5 rounded-xl border border-border/80 bg-card/60 space-y-4">
+    <div className="p-5 sm:p-6 rounded-2xl border border-border/80 bg-card/70 backdrop-blur-sm shadow-xs space-y-4">
       <div className="flex items-center justify-between">
         <h4 className="font-semibold text-sm">
           {replyToName ? `Replying to @${replyToName}` : "Join the discussion"}
