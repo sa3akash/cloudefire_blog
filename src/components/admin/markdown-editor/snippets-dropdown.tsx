@@ -1,6 +1,7 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Wand2 } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
