@@ -24,7 +24,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   try {
     const storage = getStorageService();
-    const file = await storage.getFile(objectKey);
+    let file = await storage.getFile(objectKey);
+
+    if (!file && !objectKey.startsWith("media/")) {
+      file = await storage.getFile(`media/${objectKey}`);
+    } else if (!file && objectKey.startsWith("media/")) {
+      file = await storage.getFile(objectKey.replace(/^media\//, ""));
+    }
 
     if (!file) {
       return new NextResponse("Media not found", { status: 404 });

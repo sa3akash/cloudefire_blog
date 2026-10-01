@@ -8,6 +8,15 @@ export const ALLOWED_MIME_TYPES: Record<string, string[]> = {
   "image/svg+xml": [".svg"],
 };
 
+export const EXTENSION_TO_MIME: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
+  ".svg": "image/svg+xml",
+};
+
 export function sanitizeExtension(filename: string): string {
   const parts = filename.split(".");
   if (parts.length < 2) return "";
@@ -20,11 +29,11 @@ export function validateFile(
   originalFilename: string,
   declaredMimeType: string,
   maxSize: number = MAX_FILE_SIZE_BYTES
-): { valid: boolean; error?: string; extension: string } {
+): { valid: boolean; error?: string; extension: string; mimeType: string } {
   const byteLength = data.byteLength;
 
   if (byteLength === 0) {
-    return { valid: false, error: "File is empty", extension: "" };
+    return { valid: false, error: "File is empty", extension: "", mimeType: "" };
   }
 
   if (byteLength > maxSize) {
@@ -33,24 +42,32 @@ export function validateFile(
       valid: false,
       error: `File size (${(byteLength / (1024 * 1024)).toFixed(2)} MB) exceeds maximum allowed size of ${maxMb} MB`,
       extension: "",
+      mimeType: "",
     };
   }
 
-  const mime = declaredMimeType.toLowerCase().trim();
+  const ext = sanitizeExtension(originalFilename);
+  let mime = (declaredMimeType || "").toLowerCase().trim();
+
+  // If MIME is generic, empty, or not in allowed list, check extension
+  if (!mime || mime === "application/octet-stream" || !ALLOWED_MIME_TYPES[mime]) {
+    if (ext && EXTENSION_TO_MIME[ext]) {
+      mime = EXTENSION_TO_MIME[ext];
+    }
+  }
+
   const allowedExtensions = ALLOWED_MIME_TYPES[mime];
 
   if (!allowedExtensions) {
     return {
       valid: false,
-      error: `File type "${declaredMimeType}" is not supported. Allowed types: JPEG, PNG, WebP, AVIF, SVG.`,
+      error: `File type "${declaredMimeType || "unknown"}" is not supported. Allowed formats: JPEG, PNG, WebP, AVIF, SVG.`,
       extension: "",
+      mimeType: "",
     };
   }
 
-  const ext = sanitizeExtension(originalFilename);
-  if (!allowedExtensions.includes(ext) && ext !== "") {
-    return { valid: true, extension: allowedExtensions[0] };
-  }
+  const finalExt = ext && allowedExtensions.includes(ext) ? ext : allowedExtensions[0];
 
   if (mime === "image/svg+xml") {
     const text = new TextDecoder().decode(data);
@@ -59,11 +76,12 @@ export function validateFile(
         valid: false,
         error: "SVG file contains dangerous executable scripts or event handlers",
         extension: ".svg",
+        mimeType: "image/svg+xml",
       };
     }
   }
 
-  return { valid: true, extension: ext || allowedExtensions[0] };
+  return { valid: true, extension: finalExt, mimeType: mime };
 }
 
 export function generateSafeKey(extension: string): string {

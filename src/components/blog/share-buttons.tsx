@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Share2, Check, Link as LinkIcon } from "lucide-react";
+import { trackFbEvent, trackGAEvent } from "@/lib/analytics";
 
 interface ShareButtonsProps {
   title: string;
@@ -16,6 +17,8 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
+      trackFbEvent("Share", { content_type: "article", content_name: title, method: "clipboard" });
+      trackGAEvent("share", { method: "clipboard", content_type: "article", item_id: url });
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // fallback
@@ -23,6 +26,8 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
   };
 
   const shareTwitter = () => {
+    trackFbEvent("Share", { content_type: "article", content_name: title, method: "twitter" });
+    trackGAEvent("share", { method: "twitter", content_type: "article", item_id: url });
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       title
     )}&url=${encodeURIComponent(url)}`;
@@ -30,6 +35,8 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
   };
 
   const shareLinkedIn = () => {
+    trackFbEvent("Share", { content_type: "article", content_name: title, method: "linkedin" });
+    trackGAEvent("share", { method: "linkedin", content_type: "article", item_id: url });
     const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
       url
     )}`;

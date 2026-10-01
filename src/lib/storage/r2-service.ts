@@ -5,7 +5,7 @@ export class R2StorageService implements IStorageService {
   constructor(
     private bucket: R2Bucket,
     private publicBaseUrl: string = "/api/media"
-  ) {}
+  ) { }
 
   async uploadFile(
     data: Uint8Array | ArrayBuffer,
@@ -24,10 +24,11 @@ export class R2StorageService implements IStorageService {
     }
 
     const key = generateSafeKey(validation.extension);
+    const mimeType = validation.mimeType || options.contentType;
 
     await this.bucket.put(key, data, {
       httpMetadata: {
-        contentType: options.contentType,
+        contentType: mimeType,
         cacheControl: "public, max-age=31536000, immutable",
       },
       customMetadata: options.customMetadata,
@@ -39,13 +40,19 @@ export class R2StorageService implements IStorageService {
       key,
       url,
       sizeBytes: data.byteLength,
-      mimeType: options.contentType,
+      mimeType,
     };
   }
 
   async deleteFile(key: string): Promise<boolean> {
     try {
-      await this.bucket.delete(key);
+      const cleanKey = key.startsWith("/") ? key.slice(1) : key;
+      await this.bucket.delete(cleanKey);
+      if (cleanKey.startsWith("media/")) {
+        await this.bucket.delete(cleanKey.replace(/^media\//, "")).catch(() => {});
+      } else {
+        await this.bucket.delete(`media/${cleanKey}`).catch(() => {});
+      }
       return true;
     } catch (e) {
       console.error(`Failed to delete object from R2: ${key}`, e);
@@ -54,7 +61,15 @@ export class R2StorageService implements IStorageService {
   }
 
   async getFile(key: string): Promise<StorageFile | null> {
-    const object = await this.bucket.get(key);
+    const cleanKey = key.startsWith("/") ? key.slice(1) : key;
+    let object = await this.bucket.get(cleanKey);
+
+    if (!object && !cleanKey.startsWith("media/")) {
+      object = await this.bucket.get(`media/${cleanKey}`);
+    } else if (!object && cleanKey.startsWith("media/")) {
+      object = await this.bucket.get(cleanKey.replace(/^media\//, ""));
+    }
+
     if (!object) return null;
 
     return {
@@ -66,6 +81,9 @@ export class R2StorageService implements IStorageService {
 
   getPublicUrl(key: string): string {
     const cleanKey = key.startsWith("/") ? key.slice(1) : key;
-    return `${this.publicBaseUrl}/${cleanKey}`;
+    const base = this.publicBaseUrl.endsWith("/")
+      ? this.publicBaseUrl.slice(0, -1)
+      : this.publicBaseUrl;
+    return `${base}/${cleanKey}`;
   }
 }

@@ -8,7 +8,9 @@ export * from "./validation";
 export * from "./r2-service";
 export * from "./memory-service";
 
-let memoryFallback: MemoryStorageService | null = null;
+const globalForStorage = globalThis as unknown as {
+  __memoryStorageFallback?: MemoryStorageService;
+};
 
 export function getStorageService(): IStorageService {
   try {
@@ -22,8 +24,8 @@ export function getStorageService(): IStorageService {
     // Cloudflare context is not available (e.g. during local tests or static builds)
   }
 
-  if (!memoryFallback) {
-    memoryFallback = new MemoryStorageService();
+  if (!globalForStorage.__memoryStorageFallback) {
+    globalForStorage.__memoryStorageFallback = new MemoryStorageService();
   }
-  return memoryFallback;
+  return globalForStorage.__memoryStorageFallback;
 }

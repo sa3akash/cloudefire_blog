@@ -14,6 +14,7 @@ import { ArticleNavigation } from "@/components/blog/article-navigation";
 import { ArticleTags } from "@/components/blog/article-tags";
 import { ReadingProgress } from "@/components/blog/reading-progress";
 import { MermaidRunner } from "@/components/blog/mermaid-runner";
+import { ArticleTracker } from "@/components/blog/article-tracker";
 import {
   RelatedPostsSection, RelatedPostsSkeleton,
   CommentsSectionLoader, CommentsSectionSkeleton,
@@ -86,6 +87,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   return (
     <article className="container mx-auto px-4 sm:px-6 py-10 sm:py-16 space-y-12">
       <ReadingProgress />
+      <ArticleTracker
+        title={post.title}
+        slug={post.slug}
+        category={post.category?.name}
+      />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: breadcrumbs }} />
 

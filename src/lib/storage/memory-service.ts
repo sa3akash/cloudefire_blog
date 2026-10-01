@@ -1,8 +1,18 @@
 import type { IStorageService, UploadOptions, UploadResult, StorageFile } from "./types";
 import { validateFile, generateSafeKey } from "./validation";
 
+const globalForMemoryStorage = globalThis as unknown as {
+  __memoryStorageFiles?: Map<string, { data: Uint8Array; contentType: string }>;
+};
+
+if (!globalForMemoryStorage.__memoryStorageFiles) {
+  globalForMemoryStorage.__memoryStorageFiles = new Map();
+}
+
 export class MemoryStorageService implements IStorageService {
-  private files = new Map<string, { data: Uint8Array; contentType: string }>();
+  private get files(): Map<string, { data: Uint8Array; contentType: string }> {
+    return globalForMemoryStorage.__memoryStorageFiles!;
+  }
 
   async uploadFile(
     data: Uint8Array | ArrayBuffer,
@@ -22,22 +32,37 @@ export class MemoryStorageService implements IStorageService {
     }
 
     const key = generateSafeKey(validation.extension);
-    this.files.set(key, { data: bytes, contentType: options.contentType });
+    const mimeType = validation.mimeType || options.contentType;
+    this.files.set(key, { data: bytes, contentType: mimeType });
 
     return {
       key,
-      url: `/api/media/${key}`,
+      url: this.getPublicUrl(key),
       sizeBytes: bytes.byteLength,
-      mimeType: options.contentType,
+      mimeType,
     };
   }
 
   async deleteFile(key: string): Promise<boolean> {
-    return this.files.delete(key);
+    const cleanKey = key.startsWith("/") ? key.slice(1) : key;
+    const deletedDirect = this.files.delete(cleanKey);
+    const deletedWithMedia = this.files.delete(`media/${cleanKey}`);
+    const deletedWithoutMedia = cleanKey.startsWith("media/")
+      ? this.files.delete(cleanKey.replace(/^media\//, ""))
+      : false;
+    return deletedDirect || deletedWithMedia || deletedWithoutMedia;
   }
 
   async getFile(key: string): Promise<StorageFile | null> {
-    const file = this.files.get(key);
+    const cleanKey = key.startsWith("/") ? key.slice(1) : key;
+    let file = this.files.get(cleanKey);
+
+    if (!file && !cleanKey.startsWith("media/")) {
+      file = this.files.get(`media/${cleanKey}`);
+    } else if (!file && cleanKey.startsWith("media/")) {
+      file = this.files.get(cleanKey.replace(/^media\//, ""));
+    }
+
     if (!file) return null;
     return {
       data: file.data,
@@ -47,6 +72,7 @@ export class MemoryStorageService implements IStorageService {
   }
 
   getPublicUrl(key: string): string {
-    return `/api/media/${key}`;
+    const cleanKey = key.startsWith("/") ? key.slice(1) : key;
+    return `/api/media/${cleanKey}`;
   }
 }

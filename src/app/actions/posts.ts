@@ -62,7 +62,7 @@ export async function savePostAction(
         content: parsed.data.content,
         excerpt: parsed.data.excerpt,
         createdBy: user.name || user.email,
-      }).catch(() => {});
+      }).catch(() => { });
 
       revalidatePath("/");
       revalidatePath("/blog");
@@ -94,7 +94,7 @@ export async function savePostAction(
         content: parsed.data.content,
         excerpt: parsed.data.excerpt,
         createdBy: user.name || user.email,
-      }).catch(() => {});
+      }).catch(() => { });
 
       revalidatePath("/");
       revalidatePath("/blog");

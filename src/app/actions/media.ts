@@ -26,6 +26,7 @@ export async function uploadMediaAction(formData: FormData): Promise<ActionResul
 
     const db = getDb();
     const mediaId = crypto.randomUUID();
+    const cleanUrl = result.url.replace(/\/api\/media\/media\//g, "/api/media/");
 
     await db.insert(media).values({
       id: mediaId,
@@ -33,7 +34,7 @@ export async function uploadMediaAction(formData: FormData): Promise<ActionResul
       objectKey: result.key,
       mimeType: result.mimeType,
       sizeBytes: result.sizeBytes,
-      url: result.url,
+      url: cleanUrl,
       altText,
       createdAt: new Date(),
     });
@@ -41,8 +42,8 @@ export async function uploadMediaAction(formData: FormData): Promise<ActionResul
     revalidatePath("/admin/media");
     return {
       success: true,
-      message: "File uploaded successfully to Cloudflare R2",
-      data: { id: mediaId, url: result.url, fileName: file.name },
+      message: "File uploaded successfully",
+      data: { id: mediaId, url: cleanUrl, fileName: file.name, objectKey: result.key },
     };
   } catch (err: unknown) {
     const error = err as Error;

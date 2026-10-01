@@ -94,16 +94,16 @@ export function buildPageMetadata(opts: PageSeoOptions): Metadata {
     robots: opts.noIndex
       ? { index: false, follow: true }
       : {
+        index: true,
+        follow: true,
+        googleBot: {
           index: true,
           follow: true,
-          googleBot: {
-            index: true,
-            follow: true,
-            "max-video-preview": -1,
-            "max-image-preview": "large",
-            "max-snippet": -1,
-          },
+          "max-video-preview": -1,
+          "max-image-preview": "large",
+          "max-snippet": -1,
         },
+      },
     openGraph: {
       title: opts.title,
       description: opts.description,
