@@ -16,7 +16,7 @@ export default async function WritePostPage() {
   ]);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 max-w-5xl space-y-6">
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6">
       <div className="flex items-center justify-between pb-4 border-b border-border/70">
         <div className="space-y-1">
           <Link
